@@ -1,0 +1,40 @@
+﻿@using Vipps.Models
+@model EPiServer.Reference.Commerce.Site.Features.VippsTest.Models.VippsTestViewModel
+
+<div>
+
+    <p>@Model.Message</p>
+
+    @if (string.IsNullOrEmpty(Model.Step) || Model.Step == VippsUpdatePaymentResponseStatus.Cancelled.ToString() || Model.Step == VippsUpdatePaymentResponseStatus.Refund.ToString())
+    {
+        using (Html.BeginForm("Initiate", "VippsTest"))
+        {
+            <button type="submit">Initiate</button>
+        }
+    }
+
+    @if (Model.Step == VippsUpdatePaymentResponseStatus.Initiate.ToString())
+    {
+        using (Html.BeginForm("Capture", "VippsTest"))
+        {
+            @Html.HiddenFor(m => m.VippsTestForm.OrderId)
+            <button type="submit">Capture</button>
+        }
+
+        using (Html.BeginForm("Cancel", "VippsTest"))
+        {
+            @Html.HiddenFor(m => m.VippsTestForm.OrderId)
+            <button type="submit">Cancel</button>
+        }
+    }
+
+    @if (Model.Step == VippsUpdatePaymentResponseStatus.Captured.ToString())
+    {
+        using (Html.BeginForm("Refund", "VippsTest"))
+        {
+            @Html.HiddenFor(m => m.VippsTestForm.OrderId)
+            <button type="submit">Refund</button>
+        }
+    }
+
+</div>
