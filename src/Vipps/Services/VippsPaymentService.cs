@@ -266,7 +266,7 @@ namespace Vipps.Services
             if (statusResponse?.TransactionInfo?.Status == VippsStatusResponseStatus.RESERVE.ToString()
                 || statusResponse?.TransactionInfo?.Status == VippsStatusResponseStatus.SALE.ToString())
             {
-                EnsureExpressPaymentAndShipping(cart, payment, orderId);
+                await EnsureExpressPaymentAndShipping(cart, payment, orderId);
                 payment.Status = PaymentStatus.Processed.ToString();
                 payment.TransactionID = statusResponse.TransactionInfo.TransactionId;
                 AddNoteAndSaveChanges(cart, payment, "Initiate",
@@ -292,11 +292,11 @@ namespace Vipps.Services
 
             payment.Status = PaymentStatus.Failed.ToString();
             AddNoteAndSaveChanges(cart, payment, "Initiate",
-                $"Payment with order id: {orderId} failed to initiate. Status: {statusResponse.TransactionInfo?.Status}");
+                $"Payment with order id: {orderId} failed to initiate. Status: {statusResponse?.TransactionInfo?.Status}");
 
             return new ProcessAuthorizationResponse
             {
-                ErrorMessage = $"Payment with order id: {orderId} failed to initiate. Status: {statusResponse.TransactionInfo?.Status}",
+                ErrorMessage = $"Payment with order id: {orderId} failed to initiate. Status: {statusResponse?.TransactionInfo?.Status}",
                 PaymentType = paymentType,
                 Processed = false
             };
@@ -407,13 +407,13 @@ namespace Vipps.Services
                 : null;
         }
 
-        private void EnsureExpressPaymentAndShipping(ICart cart, IPayment payment, string orderId)
+        private async Task EnsureExpressPaymentAndShipping(ICart cart, IPayment payment, string orderId)
         {
             if (cart.GetFirstShipment().ShippingMethodId == default(Guid) ||
                 cart.GetFirstShipment().ShippingAddress == null ||
                 payment?.BillingAddress == null)
             {
-                var details = GetOrderDetailsAsync(orderId).Result;
+                var details = await GetOrderDetailsAsync(orderId);
 
                 EnsureShipping(cart, details);
                 EnsureBillingAddress(payment, cart, details);
