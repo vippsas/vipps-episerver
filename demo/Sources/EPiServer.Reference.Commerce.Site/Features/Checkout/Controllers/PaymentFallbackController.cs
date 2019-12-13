@@ -1,4 +1,6 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -47,11 +49,9 @@ namespace EPiServer.Reference.Commerce.Site.Features.Checkout.Controllers
             _vippsService = vippsService;
         }
 
-        public async Task<RedirectResult> Index(string orderId)
+        public async Task<RedirectResult> Index(string orderId, string contactId, string marketId)
         {
-            var currentContactId = PrincipalInfo.CurrentPrincipal.GetContactId();
-            var currentMarketId = _currentMarket.GetCurrentMarket().MarketId.Value;
-            var result = await _vippsPaymentService.ProcessAuthorizationAsync(currentContactId, currentMarketId, orderId);
+            var result = await _vippsPaymentService.ProcessAuthorizationAsync(Guid.Parse(contactId), contactId, orderId);
 
             //If ProcessAuthorization fails user needs to be redirected back to checkout or product page
             if (!result.Processed)
