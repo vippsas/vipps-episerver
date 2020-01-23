@@ -273,7 +273,7 @@ namespace Vipps.Services
                     $"Payment with order id: {orderId} successfully initiated");
 
                 var loadOrCreatePurchaseOrderResponse = await _vippsOrderCreator.LoadOrCreatePurchaseOrder(cart, orderId);
-                if (loadOrCreatePurchaseOrderResponse.PurchaseOrder != null)
+                if (loadOrCreatePurchaseOrderResponse.PurchaseOrder != null && loadOrCreatePurchaseOrderResponse.PurchaseOrderCreated)
                 {
                     return new ProcessAuthorizationResponse
                     {
@@ -282,6 +282,7 @@ namespace Vipps.Services
                     };
                 }
 
+                CancelPaymentHelper.CancelPayment(cart, payment);
                 return new ProcessAuthorizationResponse
                 {
                     Processed = false,

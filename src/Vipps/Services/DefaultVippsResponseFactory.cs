@@ -58,6 +58,12 @@ namespace Vipps.Services
                     _orderRepository.Save(cart);
 
                     await _vippsOrderCreator.LoadOrCreatePurchaseOrder(cart, paymentCallback.OrderId);
+                    var result = await _vippsOrderCreator.LoadOrCreatePurchaseOrder(cart, paymentCallback.OrderId);
+                    if (!result.PurchaseOrderCreated)
+                    {
+                        CancelPaymentHelper.CancelPayment(cart, payment);
+                    }
+
                 }
                 else
                 {
@@ -89,6 +95,12 @@ namespace Vipps.Services
                     _orderRepository.Save(cart);
 
                     await _vippsOrderCreator.LoadOrCreatePurchaseOrder(cart, paymentCallback.OrderId);
+                    var result = await _vippsOrderCreator.LoadOrCreatePurchaseOrder(cart, paymentCallback.OrderId);
+                    if (!result.PurchaseOrderCreated)
+                    {
+                        CancelPaymentHelper.CancelPayment(cart, payment);
+                    }
+
                 }
 
                 else

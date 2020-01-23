@@ -253,6 +253,7 @@
     <Compile Include="Extensions\PaymentMethodExtensions.cs" />
     <Compile Include="Handlers\OrderCancelledEvents.cs" />
     <Compile Include="Helpers\AddressHelper.cs" />
+    <Compile Include="Helpers\CancelPaymentHelper.cs" />
     <Compile Include="Helpers\OrderNumberHelper.cs" />
     <Compile Include="Helpers\PaymentHelper.cs" />
     <Compile Include="Helpers\PhoneNumberHelper.cs" />

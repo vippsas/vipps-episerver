@@ -3,6 +3,7 @@ using System.Linq;
 using EPiServer.Commerce.Order;
 using Mediachase.Commerce.Orders;
 using Vipps.Extensions;
+using Vipps.Helpers;
 
 namespace Vipps.Handlers
 {
@@ -41,17 +42,7 @@ namespace Vipps.Handlers
             var previousPayment = _orderForm.Payments.FirstOrDefault(x => x.IsVippsPayment());
             if (previousPayment == null) return;
 
-            var voidPayment = _order.CreatePayment(_orderGroupFactory);
-            voidPayment.PaymentType = previousPayment.PaymentType;
-            voidPayment.PaymentMethodId = previousPayment.PaymentMethodId;
-            voidPayment.PaymentMethodName = previousPayment.PaymentMethodName;
-            voidPayment.Amount = previousPayment.Amount;
-            voidPayment.Status = PaymentStatus.Pending.ToString();
-            voidPayment.TransactionType = TransactionType.Void.ToString();
-
-            _order.AddPayment(voidPayment);
-
-            _paymentProcessor.ProcessPayment(_order, voidPayment, _order.GetFirstShipment());
+            CancelPaymentHelper.CancelPayment(_order, previousPayment);
         }
 
         private bool AlreadyVoided()
