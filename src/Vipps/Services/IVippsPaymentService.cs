@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using EPiServer.Commerce.Order;
-using Vipps.Models.Partials;
+using Vipps.Models;
 using Vipps.Models.ResponseModels;
 
 namespace Vipps.Services

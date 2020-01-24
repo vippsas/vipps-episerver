@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EPiServer.Commerce.Order;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
+using Vipps.Extensions;
 using Vipps.Models;
 
 namespace Vipps.Services
@@ -13,14 +15,17 @@ namespace Vipps.Services
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IVippsService _vippsService;
+        private readonly IOrderGroupCalculator _orderGroupCalculator;
         private readonly ILogger _logger = LogManager.GetLogger(typeof(DefaultVippsOrderCreator));
 
         public DefaultVippsOrderCreator(
             IOrderRepository orderRepository,
-            IVippsService vippsService)
+            IVippsService vippsService,
+            IOrderGroupCalculator groupCalculator)
         {
             _orderRepository = orderRepository;
             _vippsService = vippsService;
+            _orderGroupCalculator = groupCalculator;
         }
 
         public virtual async Task<LoadOrCreatePurchaseOrderResponse> LoadOrCreatePurchaseOrder(ICart cart, string orderId)
@@ -61,6 +66,17 @@ namespace Vipps.Services
         {
             try
             {
+                // Do your validation here or in your _orderService.CreateOrder()
+                if (_orderGroupCalculator.GetTotal(cart).Amount !=
+                    cart.GetFirstForm().Payments.FirstOrDefault(x => x.IsVippsPayment())?.Amount)
+                {
+                    return new LoadOrCreatePurchaseOrderResponse
+                    {
+                        ErrorMessage = "Wrong payment amount. Please try again",
+                        PurchaseOrderCreated = false
+                    };
+                }
+
                 _logger.Information($"Creating PurchaseOrder for orderId {cart.Properties[VippsConstants.VippsOrderIdField]}");
                 var orderReference = _orderRepository.SaveAsPurchaseOrder(cart);
                 var purchaseOrder = _orderRepository.Load<IPurchaseOrder>(orderReference.OrderGroupId);

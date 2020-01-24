@@ -11,7 +11,6 @@ using Refit;
 using Vipps.Extensions;
 using Vipps.Helpers;
 using Vipps.Models;
-using Vipps.Models.Partials;
 using Vipps.Models.ResponseModels;
 
 namespace Vipps.Services
@@ -28,7 +27,7 @@ namespace Vipps.Services
 
         public VippsPaymentService(
             IOrderRepository orderRepository,
-            VippsServiceApiFactory vippsServiceApiFactory, 
+            VippsServiceApiFactory vippsServiceApiFactory,
             IVippsRequestFactory requestFactory,
             IVippsOrderCreator vippsOrderCreator,
             IVippsService vippsService)
@@ -190,7 +189,7 @@ namespace Vipps.Services
 
             catch (ApiException apiException)
             {
-                var errorMessage = GetErrorMessage(apiException); 
+                var errorMessage = GetErrorMessage(apiException);
                 _logger.Log(Level.Error, $"Vipps cancel failed: {errorMessage}");
                 AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps cancel payment failed. Error message: {errorMessage}, {apiException}");
                 return PaymentProcessingResult.CreateUnsuccessfulResult(errorMessage);
@@ -223,8 +222,11 @@ namespace Vipps.Services
                 return new ProcessAuthorizationResponse
                 {
                     PaymentType = VippsPaymentType.UNKNOWN,
-                    ErrorMessage = $"No cart found for vipps order id {orderId}",
-                    Processed = false
+                    Processed = false,
+                    ProcessAuthorizationResponseError = new ProcessAuthorizationResponseError
+                    {
+                        ProcessAuthorizationErrorType = ProcessAuthorizationErrorType.NOCARTFOUND
+                    }
                 };
             }
 
@@ -238,7 +240,10 @@ namespace Vipps.Services
                 {
                     PaymentType = paymentType,
                     Processed = false,
-                    ErrorMessage = $"No payment added to cart for vipps order id {orderId}"
+                    ProcessAuthorizationResponseError = new ProcessAuthorizationResponseError
+                    {
+                        ProcessAuthorizationErrorType = ProcessAuthorizationErrorType.NOVIPPSPAYMENTINCART
+                    }
                 };
             }
 
@@ -254,9 +259,13 @@ namespace Vipps.Services
                 AddNoteAndSaveChanges(cart, payment, "Query", ex.Message);
                 return new ProcessAuthorizationResponse
                 {
-                    ErrorMessage = ex.Message,
                     PaymentType = paymentType,
-                    Processed = false
+                    Processed = false,
+                    ProcessAuthorizationResponseError = new ProcessAuthorizationResponseError
+                    {
+                        ErrorMessage = ex.Message,
+                        ProcessAuthorizationErrorType = ProcessAuthorizationErrorType.EXCEPTION
+                    }
                 };
             }
 
@@ -286,7 +295,21 @@ namespace Vipps.Services
                 return new ProcessAuthorizationResponse
                 {
                     Processed = false,
-                    ErrorMessage = loadOrCreatePurchaseOrderResponse.ErrorMessage,
+                    PaymentType = paymentType,
+                    ProcessAuthorizationResponseError = new ProcessAuthorizationResponseError
+                    {
+                        ErrorMessage = loadOrCreatePurchaseOrderResponse.ErrorMessage,
+                        ProcessAuthorizationErrorType = ProcessAuthorizationErrorType.ORDERVALIDATIONERROR
+                    }
+                };
+            }
+
+            //No error message. Transaction cancelled by user
+            if (statusResponse?.TransactionInfo?.Status == VippsStatusResponseStatus.CANCEL.ToString())
+            {
+                return new ProcessAuthorizationResponse
+                {
+                    Processed = false,
                     PaymentType = paymentType
                 };
             }
@@ -297,9 +320,15 @@ namespace Vipps.Services
 
             return new ProcessAuthorizationResponse
             {
-                ErrorMessage = $"Payment with order id: {orderId} failed to initiate. Status: {statusResponse?.TransactionInfo?.Status}",
                 PaymentType = paymentType,
-                Processed = false
+                Processed = false,
+                ProcessAuthorizationResponseError = new ProcessAuthorizationResponseError
+                {
+                    ProcessAuthorizationErrorType = ProcessAuthorizationErrorType.INITIATEFAILED,
+                    VippsStatusResponseStatus = Enum.TryParse<VippsStatusResponseStatus>(statusResponse?.TransactionInfo?.Status, out var status)
+                        ? status
+                        : VippsStatusResponseStatus.FAILED
+                }
             };
         }
 
@@ -453,7 +482,7 @@ namespace Vipps.Services
 
                 catch (Exception ex)
                 {
-                    _logger.Log(Level.Warning, $"Error deserializing error message. Content: {apiException?.Content}. Exception: {ex.Message}");
+                    _logger.Log(Level.Warning, $"Error deserializing error message. Content: {apiException?.Content} {ex.Message} {ex.StackTrace}");
                 }
             }
 

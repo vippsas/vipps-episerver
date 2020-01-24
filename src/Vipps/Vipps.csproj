@@ -260,8 +260,10 @@
     <Compile Include="Initialization\OrderInitialization.cs" />
     <Compile Include="Models\ExpressCheckoutResponse.cs" />
     <Compile Include="Models\LoadOrCreatePurchaseOrderResponse.cs" />
+    <Compile Include="Models\ProcessAuthorizationErrrorType.cs" />
+    <Compile Include="Models\ProcessAuthorizationResponseError.cs" />
     <Compile Include="Models\VippsPaymentType.cs" />
-    <Compile Include="Models\Partials\ProcessAuthorizationResponse.cs" />
+    <Compile Include="Models\ProcessAuthorizationResponse.cs" />
     <Compile Include="Models\Partials\TransactionLogHistory.cs" />
     <Compile Include="Models\RequestModels\UpdatePaymentRequest.cs" />
     <Compile Include="Models\ResponseModels\DetailsResponse.cs" />
