@@ -21,11 +21,11 @@ namespace Vipps.Services
         public DefaultVippsOrderCreator(
             IOrderRepository orderRepository,
             IVippsService vippsService,
-            IOrderGroupCalculator groupCalculator)
+            IOrderGroupCalculator orderGroupCalculator)
         {
             _orderRepository = orderRepository;
             _vippsService = vippsService;
-            _orderGroupCalculator = groupCalculator;
+            _orderGroupCalculator = orderGroupCalculator;
         }
 
         public virtual async Task<LoadOrCreatePurchaseOrderResponse> LoadOrCreatePurchaseOrder(ICart cart, string orderId)
