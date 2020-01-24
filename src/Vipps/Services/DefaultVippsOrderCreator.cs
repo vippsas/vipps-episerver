@@ -67,15 +67,16 @@ namespace Vipps.Services
             try
             {
                 // Do your validation here or in your _orderService.CreateOrder()
-                if (_orderGroupCalculator.GetTotal(cart).Amount !=
-                    cart.GetFirstForm().Payments.FirstOrDefault(x => x.IsVippsPayment())?.Amount)
-                {
-                    return new LoadOrCreatePurchaseOrderResponse
-                    {
-                        ErrorMessage = "Wrong payment amount. Please try again",
-                        PurchaseOrderCreated = false
-                    };
-                }
+
+                //if (_orderGroupCalculator.GetTotal(cart).Amount !=
+                //    cart.GetFirstForm().Payments.FirstOrDefault(x => x.IsVippsPayment())?.Amount)
+                //{
+                //    return new LoadOrCreatePurchaseOrderResponse
+                //    {
+                //        ErrorMessage = "Wrong payment amount. Please try again",
+                //        PurchaseOrderCreated = false
+                //    };
+                //}
 
                 _logger.Information($"Creating PurchaseOrder for orderId {cart.Properties[VippsConstants.VippsOrderIdField]}");
                 var orderReference = _orderRepository.SaveAsPurchaseOrder(cart);
