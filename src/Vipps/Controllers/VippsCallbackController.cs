@@ -66,15 +66,18 @@ namespace Vipps.Controllers
 
                 if (paymentCallback.ShippingDetails != null && paymentCallback.UserDetails != null)
                 {
+                    _logger.Information($"Handling express callback for {orderId}");
                     return Content(await _responseFactory.HandleExpressCallback(cart, paymentCallback), string.Empty);
                 }
 
+                _logger.Information($"Handling checkout callback for {orderId}");
                 return Content(await _responseFactory.HandleCallback(cart, paymentCallback), string.Empty);
 
             }
 
             catch (Exception ex)
             {
+                _logger.Error($"{ex.Message} {ex.StackTrace}");
                 return InternalServerError(ex);
             }
 

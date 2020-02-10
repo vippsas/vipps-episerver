@@ -20,17 +20,15 @@ namespace Vipps.Services
     public class DefaultVippsResponseFactory : IVippsResponseFactory
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly IVippsPaymentService _vippsPaymentService;
         private readonly IPromotionEngine _promotionEngine;
         private readonly IOrderGroupFactory _orderGroupFactory;
         private readonly IOrderGroupCalculator _orderGroupCalculator;
         private readonly IVippsOrderCreator _vippsOrderCreator;
-        public readonly IVippsService _vippsService;
+        private readonly IVippsService _vippsService;
         private readonly ILogger _logger = LogManager.GetLogger(typeof(DefaultVippsResponseFactory));
 
         public DefaultVippsResponseFactory(
             IOrderRepository orderRepository,
-            IVippsPaymentService vippsPaymentService,
             IPromotionEngine promotionEngine,
             IOrderGroupFactory orderGroupFactory,
             IOrderGroupCalculator orderGroupCalculator,
@@ -38,14 +36,13 @@ namespace Vipps.Services
             IVippsService vippsService)
         {
             _orderRepository = orderRepository;
-            _vippsPaymentService = vippsPaymentService;
             _promotionEngine = promotionEngine;
             _orderGroupFactory = orderGroupFactory;
             _orderGroupCalculator = orderGroupCalculator;
             _vippsOrderCreator = vippsOrderCreator;
             _vippsService = vippsService;
         }
-        
+
         public virtual async Task<HttpStatusCode> HandleCallback(ICart cart, PaymentCallback paymentCallback)
         {
             var payment = cart.GetFirstForm().Payments.FirstOrDefault(x => x.IsVippsPayment());
@@ -55,22 +52,22 @@ namespace Vipps.Services
                     paymentCallback.TransactionInfo.Status == VippsCallbackStatus.SALE.ToString())
                 {
                     payment.Status = PaymentStatus.Processed.ToString();
-                    _orderRepository.Save(cart);
+                    OrderNoteHelper.AddNoteAndSaveChanges(cart, payment, "Initiate",
+                        $"Payment with order id: {paymentCallback.OrderId} successfully initiated with {paymentCallback.TransactionInfo?.Status}");
 
-                    await _vippsOrderCreator.LoadOrCreatePurchaseOrder(cart, paymentCallback.OrderId);
                     var result = await _vippsOrderCreator.LoadOrCreatePurchaseOrder(cart, paymentCallback.OrderId);
                     if (!result.PurchaseOrderCreated)
                     {
                         CancelPaymentHelper.CancelPayment(cart, payment);
                     }
-
                 }
                 else
                 {
                     payment.Status = PaymentStatus.Failed.ToString();
-                    _orderRepository.Save(cart);
+                    OrderNoteHelper.AddNoteAndSaveChanges(cart, payment, "Initiate",
+                        $"Payment with order id: {paymentCallback.OrderId} failed to initiate. Status: {paymentCallback.TransactionInfo?.Status}");
                 }
-                
+
                 return HttpStatusCode.OK;
             }
 
@@ -92,21 +89,22 @@ namespace Vipps.Services
                     UpdatePayment(cart, payment, orderAddress, paymentCallback.TransactionInfo);
 
                     cart.ApplyDiscounts(_promotionEngine, new PromotionEngineSettings());
-                    _orderRepository.Save(cart);
+                    OrderNoteHelper.AddNoteAndSaveChanges(cart, payment, "Initiate",
+                        $"Payment with order id: {paymentCallback.OrderId} successfully initiated with {paymentCallback.TransactionInfo?.Status}");
 
-                    await _vippsOrderCreator.LoadOrCreatePurchaseOrder(cart, paymentCallback.OrderId);
                     var result = await _vippsOrderCreator.LoadOrCreatePurchaseOrder(cart, paymentCallback.OrderId);
                     if (!result.PurchaseOrderCreated)
                     {
                         CancelPaymentHelper.CancelPayment(cart, payment);
                     }
-
                 }
 
                 else
                 {
+
                     payment.Status = PaymentStatus.Failed.ToString();
-                    _orderRepository.Save(cart);
+                    OrderNoteHelper.AddNoteAndSaveChanges(cart, payment, "Initiate",
+                        $"Payment with order id: {paymentCallback.OrderId} failed to initiate. Status: {paymentCallback.TransactionInfo?.Status}");
                 }
 
                 return HttpStatusCode.OK;
@@ -120,7 +118,7 @@ namespace Vipps.Services
         {
             var cart = _vippsService.GetCartByContactId(contactId, marketId, orderId);
 
-            var shippingMethods = ShippingManager.GetShippingMethodsByMarket(cart.MarketId.Value, false).ShippingMethod.ToList().OrderBy(x=>x.Ordering);
+            var shippingMethods = ShippingManager.GetShippingMethodsByMarket(cart.MarketId.Value, false).ShippingMethod.ToList().OrderBy(x => x.Ordering);
 
             var shippingDetails = new List<ShippingDetail>();
 

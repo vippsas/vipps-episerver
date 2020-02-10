@@ -44,7 +44,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.Checkout.Controllers
 
         public async Task<RedirectResult> Index(string orderId, string contactId, string marketId)
         {
-            var result = await _vippsPaymentService.ProcessAuthorizationAsync(Guid.Parse(contactId), contactId, orderId);
+            var result = await _vippsPaymentService.ProcessAuthorizationAsync(Guid.Parse(contactId), marketId, orderId);
 
             //If ProcessAuthorization fails user needs to be redirected back to checkout or product page
             if (!result.Processed)
