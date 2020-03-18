@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using EPiServer.Commerce.Order;
 using EPiServer.ServiceLocation;
 using Mediachase.Commerce.Orders;
@@ -35,16 +34,16 @@ namespace Vipps
                     return VippsPaymentsService.InitiateAsync(orderGroup, payment).GetAwaiter().GetResult();
 
                 case nameof(TransactionType.Capture):
-                    return VippsPaymentsService.CaptureAsync(orderGroup, payment, shipment).GetAwaiter().GetResult();
+                    return VippsPaymentsService.CaptureAsync(orderGroup, payment).GetAwaiter().GetResult();
 
                 case nameof(TransactionType.Sale):
                     return VippsPaymentsService.InitiateAsync(orderGroup, payment).GetAwaiter().GetResult();
 
                 case nameof(TransactionType.Void):
-                    return VippsPaymentsService.CancelAsync(orderGroup, payment, shipment).GetAwaiter().GetResult();
+                    return VippsPaymentsService.CancelAsync(orderGroup, payment).GetAwaiter().GetResult();
 
                 case nameof(TransactionType.Credit):
-                    return VippsPaymentsService.RefundAsync(orderGroup, payment, shipment).GetAwaiter().GetResult();
+                    return VippsPaymentsService.RefundAsync(orderGroup, payment).GetAwaiter().GetResult();
 
                 default:
                     throw new NotImplementedException();

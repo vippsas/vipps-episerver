@@ -52,7 +52,9 @@ services.AddTransient<IVippsService, VippsService>();
 services.AddTransient<IVippsPaymentService, VippsPaymentService>();
 services.AddTransient<IVippsRequestFactory, DefaultVippsRequestFactory>();
 services.AddTransient<IVippsResponseFactory, DefaultVippsResponseFactory>();
-services.AddSingleton<IVippsOrderCreator, DefaultVippsOrderCreator>();
+services.AddSingleton<IVippsOrderSynchronizer, DefaultVippsOrderSynchronizer>();
+services.AddSingleton<IVippsOrderProcessor, DefaultVippsOrderProcessor>();
+services.AddSingleton<IVippsPollingService, VippsPollingService>();
 ```
 
 It is important that IVippsOrderCreator is registered as a singleton.
@@ -62,10 +64,10 @@ Must be implemented in your project.
 The package automatically appends the generated order id as a querystring to the specified url. The quicksilver example implementation can be found [here](demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs)
 
 ProcessAuthorizationAsync method on IVippsPaymentServices will return the created purchase order for you if the callback from Vipps was successfull. If not, it will ensure all the correct information is on the payment and shimpent objects and then create the purchase order.
-If you want to modify the behaviour of creating purchase orders, override the CreatePurchaseOrder method on DefaultVippsOrderCreator class.
+**No validation against tempering with the cart line items is done within the package**
 
 ```
-var result = await _vippsPaymentService.ProcessAuthorizationAsync(currentContactId, currentMarketId, orderId);
+var result = await _vippsPaymentService.ProcessAuthorizationAsync(currentContactId, currentMarketId, cartName, orderId);
 ```
 
 The method returns a ProcessAuthorizationResponse which contains an enum called VippsPaymentType, this can be set to
@@ -78,9 +80,62 @@ The method returns a ProcessAuthorizationResponse which contains an enum called 
 This determines where the fallbackcontroller should redirect if processAuthorizationResult.Processed = false
 Back to checkout, product, wishlist or cart page.
 
-If the payment is processed and the paymenttype is WISHLISTEXPRESS, you might also consider finding the customers wishlist cart and deleteing it in the fallback controller.
-
+If the payment is processed and the paymenttype is WISHLISTEXPRESS, you might also consider finding the customers wishlist cart and deleting it in the fallback controller.
 *Note that this only applies to Express payments. If you are only using vipps in the checkout, VippsPaymentType will always be CHECKOUT and the redirect action will be determined by if the payment succeeded or not.*
+
+The ProcessAuthorizationResponse also contains a possible error message as well as a ProcessResponseErrorType enum.
+ - NONE
+ - NOCARTFOUND
+ - NOVIPPSPAYMENTINCART
+ - FAILED
+ - ORDERVALIDATIONERROR
+ - EXCEPTION
+ - OTHER
+
+### Polling
+The package includes polling the vipps api to ensure that the payment is handled, even if user closes the browser tab before redirect and a callback from vipps is not received.
+ - Polling is started when a user is redirected to vipps.
+ - Polling is active for up to ten minutes
+ - If a payment has a status that we can act upon polling stops.
+ - Set polling interval by adding Vipps:PollingInterval app setting in web config (in milliseconds). Default is 2000ms
+ 
+ #### Order validation
+No order validation is included in this package to protect from f.ex. cart tempering. It is **highly** recommended that you implement your own order validation. 
+Override CreatePurchaseOrder method in DefaultVippsOrderProcessor class.
+
+**Example:** (assuming MyOrderService handles all the order validation)
+´´´
+public override async Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
+        {
+            try
+            {
+				var respone = _myOrderService.CreatePurchaseOrder(cart);
+				
+				if (response.Success)
+				{
+					return new ProcessOrderResponse
+					{
+						PurchaseOrder = response.PurcaseOrder
+					};
+				}
+				
+				return new ProcessOrderResponse
+				{
+					ProcessResponseErrorType = ProcessResponseErrorType.ORDERVALIDATIONERROR,
+					ErrorMessage = respone.Message
+				};
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message);
+                return new ProcessOrderResponse
+                {
+                    ErrorMessage = ex.Message,
+                    ProcessResponseErrorType = ProcessResponseErrorType.EXCEPTION
+                };
+            }
+        }
+´´´
 
 ## Express payments
 ### Express payments workflow (Product page)
@@ -122,8 +177,6 @@ If the payment is processed and the paymenttype is WISHLISTEXPRESS, you might al
 ### Callbacks
 The code being run on all callbacks is in DefaultVippsResponseFactory, if you need to customize any of this behaviour, just create a new class that inherits from DefaultVippsResponseFactory, override the relevant methods and register it in your initialization module as your implementation of IVippsResponseFactory
 
-You are also able to customize PurchaseOrder creation behaviour that happens on callback by overriding the CreatePurchaseOrder method on DefaultVippsOrderCreator class.
-
 ### Express controller
 An api controller for initializing an express checkout is included in the package. This controller contains basic add to cart functionality for express checkout on product pages, but if you want to use your own cart workflow you will need to create your own controller for this.
 
@@ -148,11 +201,11 @@ If you need to implement your own version of the Express Checkout Controller, wh
 This is how we differentiate express payments from regular checkout payments, as well as how we determine the redirect action in the ProcessAuthorizationResponse so the actual processing of the payment will go wrong if this metafield is not set. This metafiled key is located in VippsConstants.VippsPaymentType and the avaliable Values in VippsPaymentType enum.
 
 **Cart Name**
-For Vipps Express on product page, the cart name has to be "VippsSingleProductCart". This string can be found in VippsConstants.VippsSingleProductCart. This is because we don't want to delete the users "Default" cart when using the Express Checkout
-If cart names are anything else then this or "Default", the callbacks will not be able to find the cart, and you will have to create your own implementation of GetCartByContactId in VippsService.
+In the included implementation of Vipps Express on product page, the cart name is "VippsSingleProductCart". This string can be found in VippsConstants.VippsSingleProductCart. This is because we don't want to delete the users "Default" cart when using the Express Checkout.
+If you're creating your own implementation, the cart name can be anything you choose since it is passed back to us in the callback and fallback urls.
 
 **Clear cart payments before adding a new payment**
-If there are multiple payments attatched to an express cart, we won't be able to find the cart based of the generated id.
+It's assumed that a cart only has one Vipps payment associatied with it.
 
 **PaymentHelper**
 PaymentHelper will help you create and add a Vipps payment to the cart. It has two helpful methods:

@@ -23,7 +23,7 @@ namespace Vipps.Helpers
             return orderAddress;
         }
 
-        public static IOrderAddress UserDetailsAndShippingDetailsToOrderAddress(UserDetails userDetails, ShippingDetail shippingDetails, ICart cart)
+        public static IOrderAddress UserDetailsAndShippingDetailsToOrderAddress(UserDetails userDetails, ShippingDetails shippingDetails, ICart cart)
         {
             var addressId = $"{shippingDetails.Address.AddressLine1}{shippingDetails.Address.AddressLine2}{shippingDetails.Address.City}";
             var orderAddress = cart.CreateOrderAddress(_orderGroupFactory.Service, addressId);

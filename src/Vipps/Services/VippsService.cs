@@ -1,48 +1,91 @@
 ﻿using System;
-using System.Configuration;
-using System.Data.SqlClient;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using EPiServer.Commerce.Order;
-using EPiServer.Commerce.Order.Internal;
+using EPiServer.Logging;
 using EPiServer.ServiceLocation;
 using Mediachase.Commerce.Orders;
 using Mediachase.Commerce.Orders.Search;
+using Refit;
+using Vipps.Extensions;
+using Vipps.Helpers;
+using Vipps.Models.ResponseModels;
 
 namespace Vipps.Services
 {
     [ServiceConfiguration(typeof(IVippsService))]
-    public class VippsService : IVippsService
+    public class VippsService : VippsServiceBase, IVippsService
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly SerializableCartProvider _serializableCartProvider;
+        private readonly VippsServiceApiFactory _vippsServiceApiFactory;
+        private readonly IVippsConfigurationLoader _configurationLoader;
+        private readonly ILogger _logger = LogManager.GetLogger(typeof(VippsService));
 
-        public VippsService(IOrderRepository orderRepository, SerializableCartProvider serializableCartProvider)
+        public VippsService(IOrderRepository orderRepository,
+            VippsServiceApiFactory vippsServiceApiFactory,
+            IVippsConfigurationLoader configurationLoader)
         {
             _orderRepository = orderRepository;
-            _serializableCartProvider = serializableCartProvider;
+            _vippsServiceApiFactory = vippsServiceApiFactory;
+            _configurationLoader = configurationLoader;
         }
 
-        public virtual ICart GetCartByContactId(string contactId, string marketId, string orderId)
+        public virtual async Task<DetailsResponse> GetOrderDetailsAsync(string orderId, string marketId)
         {
-            return GetCartByContactId(Guid.Parse(contactId), marketId, orderId);
+            var configuration = _configurationLoader.GetConfiguration(marketId);
+            var serviceApi = _vippsServiceApiFactory.Create(configuration);
+
+            try
+            {
+                return await serviceApi.Details(orderId).ConfigureAwait(false);
+            }
+
+            catch (ApiException apiException)
+            {
+                var errorMessage = GetErrorMessage(apiException);
+                _logger.Log(Level.Error, $"Error getting payment details. Error message: {errorMessage}");
+            }
+
+            catch (Exception ex)
+            {
+                _logger.Error($"Error getting payment details. Exception: {ex.Message} {ex.StackTrace}");
+            }
+
+            return null;
         }
 
-        public virtual ICart GetCartByContactId(Guid contactId, string marketId, string orderId)
+        public virtual async Task<StatusResponse> GetOrderStatusAsync(string orderId, string marketId)
         {
-            var defaultCart = _orderRepository.LoadCart<ICart>(contactId, VippsConstants.VippsDefaultCartName, marketId);
-            if (defaultCart != null && defaultCart.Properties[VippsConstants.VippsOrderIdField]?.ToString() == orderId)
+            var configuration = _configurationLoader.GetConfiguration(marketId);
+            var serviceApi = _vippsServiceApiFactory.Create(configuration);
+
+            try
             {
-                return defaultCart;
+                return await serviceApi.Status(orderId).ConfigureAwait(false);
             }
 
-            var singleProductCart = _orderRepository.LoadCart<ICart>(contactId, VippsConstants.VippsSingleProductCart, marketId);
-            if (singleProductCart != null && singleProductCart.Properties[VippsConstants.VippsOrderIdField]?.ToString() == orderId)
+            catch (ApiException apiException)
             {
-                return singleProductCart;
+                var errorMessage = GetErrorMessage(apiException);
+                _logger.Log(Level.Error, $"Error getting order status. Error message: {errorMessage}");
             }
 
-            return GetCartByOrderId(orderId);
+            catch (Exception ex)
+            {
+                _logger.Error($"Error getting order status. Exception: {ex.Message} {ex.StackTrace}");
+            }
+
+            return null;
+        }
+
+        public virtual ICart GetCartByContactId(string contactId, string marketId, string cartName)
+        {
+            return GetCartByContactId(Guid.Parse(contactId), marketId, cartName);
+        }
+
+        public virtual ICart GetCartByContactId(Guid contactId, string marketId, string cartName)
+        {
+            return _orderRepository.LoadCart<ICart>(contactId, cartName, marketId);
         }
 
         public IPurchaseOrder GetPurchaseOrderByOrderId(string orderId)
@@ -65,29 +108,6 @@ namespace Vipps.Services
             {
                 return _orderRepository.Load<IPurchaseOrder>(purchaseOrder.OrderGroupId);
             }
-            return null;
-        }
-
-        private ICart GetCartByOrderId(string orderId)
-        {
-            //Last resort find cart by sql query
-            var connectionString = ConfigurationManager.ConnectionStrings["EcfSqlConnection"];
-            var sqlString = $"Select CartId FROM [SerializableCart] WHERE Data Like '%\"$value\":\"{orderId}\"%' And Data Like '%{VippsConstants.VippsOrderIdField}%'";
-
-            using (var sqlConnection = new SqlConnection(connectionString.ConnectionString))
-            {
-                var cmd = new SqlCommand(sqlString, sqlConnection);
-                sqlConnection.Open();
-
-                var value = cmd.ExecuteScalar();
-
-                if (value != null)
-                {
-                    var cartId = (int)value;
-                    return _serializableCartProvider.Load(cartId);
-                }
-            }
-
             return null;
         }
     }

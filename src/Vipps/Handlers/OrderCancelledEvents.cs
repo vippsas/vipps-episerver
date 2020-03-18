@@ -39,10 +39,10 @@ namespace Vipps.Handlers
 
             if (AlreadyVoided()) return;
 
-            var previousPayment = _orderForm.Payments.FirstOrDefault(x => x.IsVippsPayment());
+            var previousPayment = _orderForm.Payments.FirstOrDefault(x => x.IsVippsPayment() && x.Status == PaymentStatus.Processed.ToString());
             if (previousPayment == null) return;
 
-            CancelPaymentHelper.CancelPayment(_order, previousPayment);
+            PaymentHelper.CancelPayment(_order, previousPayment);
         }
 
         private bool AlreadyVoided()

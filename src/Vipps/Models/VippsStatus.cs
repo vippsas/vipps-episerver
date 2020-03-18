@@ -3,6 +3,7 @@
     public enum VippsCallbackStatus
     {
         RESERVED,
+        RESERVE,
         SALE,
         RESERVE_FAILED,
         SALE_FAILED,
@@ -18,7 +19,7 @@
         REJECTED
     }
 
-    public enum VippsDetailsResponseStatus
+    public enum VippsDetailsResponseOperation
     {
         INITIATE,
         RESERVE,

@@ -47,6 +47,12 @@
     <Reference Include="Castle.Windsor, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Castle.Windsor.4.1.0\lib\net45\Castle.Windsor.dll</HintPath>
     </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="EPiServer, Version=11.11.1.0, Culture=neutral, PublicKeyToken=8fe83dea738b45b7, processorArchitecture=MSIL">
       <HintPath>..\..\packages\EPiServer.CMS.Core.11.11.1\lib\net461\EPiServer.dll</HintPath>
     </Reference>
@@ -244,25 +250,29 @@
     <Compile Include="AuthenticatedHttpClientHandler.cs" />
     <Compile Include="Controllers\VippsCallbackController.cs" />
     <Compile Include="Controllers\VippsExpressController.cs" />
+    <Compile Include="DefaultVippsConfigurationLoader.cs" />
     <Compile Include="Extensions\PaymentExtensions.cs" />
     <Compile Include="Extensions\OrderGroupExtensions.cs" />
     <Compile Include="Extensions\PaymentMethodDtoExtensions.cs" />
     <Compile Include="Extensions\PaymentMethodExtensions.cs" />
     <Compile Include="Handlers\OrderCancelledEvents.cs" />
     <Compile Include="Helpers\AddressHelper.cs" />
-    <Compile Include="Helpers\CancelPaymentHelper.cs" />
+    <Compile Include="Helpers\ExpressPaymentOrderDetailsHelper.cs" />
     <Compile Include="Helpers\OrderNoteHelper.cs" />
     <Compile Include="Helpers\OrderNumberHelper.cs" />
     <Compile Include="Helpers\PaymentHelper.cs" />
     <Compile Include="Helpers\PhoneNumberHelper.cs" />
-    <Compile Include="Helpers\PriceHelper.cs" />
+    <Compile Include="Helpers\AmountHelper.cs" />
     <Compile Include="Initialization\MetadataInitialization.cs" />
     <Compile Include="Initialization\MetadataInitializationBase.cs" />
     <Compile Include="Initialization\OrderInitialization.cs" />
+    <Compile Include="Initialization\PollingInitialization.cs" />
+    <Compile Include="IVippsConfigurationLoader.cs" />
     <Compile Include="Models\ExpressCheckoutResponse.cs" />
-    <Compile Include="Models\LoadOrCreatePurchaseOrderResponse.cs" />
-    <Compile Include="Models\ProcessAuthorizationErrrorType.cs" />
-    <Compile Include="Models\ProcessAuthorizationResponseError.cs" />
+    <Compile Include="Models\IVippsPaymentDetails.cs" />
+    <Compile Include="Models\IVippsUserDetails.cs" />
+    <Compile Include="Models\ProcessOrderResponse.cs" />
+    <Compile Include="Models\ProcessResponseErrorType.cs" />
     <Compile Include="Models\VippsPaymentType.cs" />
     <Compile Include="Models\ProcessAuthorizationResponse.cs" />
     <Compile Include="Models\Partials\TransactionLogHistory.cs" />
@@ -284,12 +294,17 @@
     <Compile Include="Models\Partials\ShippingDetail.cs" />
     <Compile Include="Models\ResponseModels\StatusResponse.cs" />
     <Compile Include="Models\Partials\TransactionInfo.cs" />
+    <Compile Include="Polling\PollingEntityDbContext.cs" />
+    <Compile Include="Polling\VippsPollingEntity.cs" />
     <Compile Include="Models\VippsStatus.cs" />
     <Compile Include="Helpers\VippsExpressCartHelper.cs" />
-    <Compile Include="Services\DefaultVippsOrderCreator.cs" />
+    <Compile Include="Services\DefaultVippsOrderProcessor.cs" />
+    <Compile Include="Services\DefaultVippsOrderSynchronizer.cs" />
     <Compile Include="Services\DefaultVippsRequestFactory.cs" />
     <Compile Include="Services\DefaultVippsResponseFactory.cs" />
-    <Compile Include="Services\IVippsOrderCreator.cs" />
+    <Compile Include="Services\IVippsOrderProcessor.cs" />
+    <Compile Include="Services\IVippsOrderSynchronizer.cs" />
+    <Compile Include="Polling\IVippsPollingService.cs" />
     <Compile Include="Services\VippsPaymentService.cs" />
     <Compile Include="Services\IVippsRequestFactory.cs" />
     <Compile Include="Services\IVippsPaymentService.cs" />
@@ -297,7 +312,9 @@
     <Compile Include="Services\IVippsResponseFactory.cs" />
     <Compile Include="IVippsApi.cs" />
     <Compile Include="Services\IVippsService.cs" />
+    <Compile Include="Polling\VippsPollingService.cs" />
     <Compile Include="Services\VippsService.cs" />
+    <Compile Include="Services\VippsServiceBase.cs" />
     <Compile Include="VippsConfiguration.cs" />
     <Compile Include="VippsConstants.cs" />
     <Compile Include="VippsPaymentGateway.cs" />

@@ -2,7 +2,7 @@
 
 namespace Vipps.Models.Partials
 {
-    public class ShippingDetail
+    public class ShippingDetails
     {
         [JsonProperty("address")]
         public Address Address { get; set; }

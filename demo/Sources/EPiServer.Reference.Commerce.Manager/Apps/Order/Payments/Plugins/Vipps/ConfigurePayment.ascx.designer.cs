@@ -17,16 +17,25 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.UpdatePanel ConfigureUpdatePanelContentPanel;
+        
+        /// <summary>
+        /// marketDropDownList control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList marketDropDownList;
         
         /// <summary>
         /// txtClientId control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtClientId;
         
@@ -35,7 +44,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator requiredUsername;
         
@@ -44,7 +53,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtClientSecret;
         
@@ -53,7 +62,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator requiredPassword;
         
@@ -62,7 +71,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtSubscriptionKey;
         
@@ -71,7 +80,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator requiredSubscriptionKey;
         
@@ -80,7 +89,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtSerialNumber;
         
@@ -89,7 +98,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator requiredSerialNumber;
         
@@ -98,7 +107,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtApiUrl;
         
@@ -107,7 +116,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator requiredApiUrl;
         
@@ -116,7 +125,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtSiteBaseUrl;
         
@@ -125,7 +134,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator requiredSiteBaseUrl;
         
@@ -134,7 +143,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtFallbackUrl;
         
@@ -143,7 +152,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator requiredFallbackUrl;
         
@@ -152,7 +161,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtTransactionMessage;
         
@@ -161,8 +170,80 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps {
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator requiredTransactionMessage;
+        
+        /// <summary>
+        /// txtLegacyClientId control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtLegacyClientId;
+        
+        /// <summary>
+        /// txtLegacyClientSecret control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtLegacyClientSecret;
+        
+        /// <summary>
+        /// txtLegacySubscriptionKey control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtLegacySubscriptionKey;
+        
+        /// <summary>
+        /// txtLegacySerialNumber control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtLegacySerialNumber;
+        
+        /// <summary>
+        /// txtLegacyApiUrl control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtLegacyApiUrl;
+        
+        /// <summary>
+        /// txtLegacySiteBaseUrl control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtLegacySiteBaseUrl;
+        
+        /// <summary>
+        /// txtLegacyFallbackUrl control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtLegacyFallbackUrl;
+        
+        /// <summary>
+        /// txtLegacyTransactionMessage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify, move the field declaration from the designer file to a code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtLegacyTransactionMessage;
     }
 }

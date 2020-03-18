@@ -11,5 +11,11 @@ namespace Vipps.Helpers
 
             orderGroup.AddNote(noteTitle, $"Payment {transactionType.ToLower()}: {noteMessage}");
         }
+
+        public static void AddNoteAndSaveChanges(IOrderGroup orderGroup, string noteTitle,
+            string noteMessage)
+        {
+            orderGroup.AddNote(noteTitle, noteMessage);
+        }
     }
 }

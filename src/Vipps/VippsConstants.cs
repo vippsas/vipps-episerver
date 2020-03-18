@@ -28,6 +28,9 @@
         //Payment variables
         public const string ExpressCheckout = "eComm Express Payment";
         public const string RegularCheckout = "eComm Regular Payment";
+        
+        // Payment method property fields
+        public const string VippsSerializedMarketOptions = "VippsSerializedMarketOptions";
 
     }
 }

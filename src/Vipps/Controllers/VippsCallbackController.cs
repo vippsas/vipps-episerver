@@ -23,14 +23,14 @@ namespace Vipps.Controllers
             _vippsService = vippsService;
         }
 
-        [Route("{contactId}/{marketId}/v2/payments/{orderId}/shippingDetails")]
+        [Route("{contactId}/{marketId}/{cartName}/v2/payments/{orderId}/shippingDetails")]
         [AcceptVerbs("Post")]
         [HttpPost]
-        public IHttpActionResult ShippingDetails(string contactId, string marketId, string orderId, [FromBody]ShippingRequest shippingRequest)
+        public IHttpActionResult ShippingDetails(string contactId, string marketId, string cartName, string orderId, [FromBody]ShippingRequest shippingRequest)
         {
             try
             {
-                var response = _responseFactory.GetShippingDetails(orderId, contactId, marketId, shippingRequest);
+                var response = _responseFactory.GetShippingDetails(orderId, contactId, marketId, cartName, shippingRequest);
                 return Ok(response);
             }
 
@@ -42,36 +42,29 @@ namespace Vipps.Controllers
             
         }
 
-        [Route("{contactId}/{marketId}/v2/consents/{userId}")]
+        [Route("v2/consents/{userId}")]
         [AcceptVerbs("Delete")]
         [HttpDelete]
-        public IHttpActionResult RemoveUserConsent(string contactId)
+        public IHttpActionResult RemoveUserConsent(string userId)
         {
             return Ok();
         }
 
-        [Route("{contactId}/{marketId}/v2/payments/{orderId}")]
+        [Route("{contactId}/{marketId}/{cartName}/v2/payments/{orderId}")]
         [AcceptVerbs("Post")]
         [HttpPost]
-        public async Task<IHttpActionResult> Callback(string contactId, string marketId, string orderId, [FromBody]PaymentCallback paymentCallback)
+        public async Task<IHttpActionResult> Callback(string contactId, string marketId, string cartName, string orderId, [FromBody]PaymentCallback paymentCallback)
         {
             try
             {
-                var cart = _vippsService.GetCartByContactId(contactId, marketId, orderId);
-                if (cart == null)
-                {
-                    _logger.Warning($"Cart with id {orderId} not found");
-                    return BadRequest($"Cart with id {orderId} not found");
-                }
-
                 if (paymentCallback.ShippingDetails != null && paymentCallback.UserDetails != null)
                 {
                     _logger.Information($"Handling express callback for {orderId}");
-                    return Content(await _responseFactory.HandleExpressCallback(cart, paymentCallback), string.Empty);
+                    return Content(await _responseFactory.HandleExpressCallback(orderId, contactId, marketId, cartName, paymentCallback), string.Empty);
                 }
 
                 _logger.Information($"Handling checkout callback for {orderId}");
-                return Content(await _responseFactory.HandleCallback(cart, paymentCallback), string.Empty);
+                return Content(await _responseFactory.HandleCallback(orderId, contactId, marketId, cartName, paymentCallback), string.Empty);
 
             }
 
@@ -80,7 +73,6 @@ namespace Vipps.Controllers
                 _logger.Error($"{ex.Message} {ex.StackTrace}");
                 return InternalServerError(ex);
             }
-
         }
     }
 }

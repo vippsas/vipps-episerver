@@ -4,7 +4,7 @@ using Vipps.Models.Partials;
 namespace Vipps.Models.ResponseModels
 {
 
-    public class PaymentCallback
+    public class PaymentCallback : IVippsUserDetails
     {
         [JsonProperty("merchantSerialNumber")]
         public int MerchantSerialNumber { get; set; }
@@ -13,7 +13,7 @@ namespace Vipps.Models.ResponseModels
         public string OrderId { get; set; }
 
         [JsonProperty("shippingDetails")]
-        public ShippingDetail ShippingDetails { get; set; }
+        public ShippingDetails ShippingDetails { get; set; }
 
         [JsonProperty("transactionInfo")]
         public TransactionInfo TransactionInfo { get; set; }

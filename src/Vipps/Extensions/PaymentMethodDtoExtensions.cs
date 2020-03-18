@@ -4,7 +4,7 @@ namespace Vipps.Extensions
 {
     public static class PaymentMethodDtoExtensions
     {
-        public static VippsConfiguration GetVippsConfiguration(this PaymentMethodDto paymentMethod)
+        public static VippsConfiguration GetLegacyVippsConfiguration(this PaymentMethodDto paymentMethod)
         {
             return new VippsConfiguration
             {

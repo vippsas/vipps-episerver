@@ -29,6 +29,7 @@ using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.WebPages;
 using EPiServer.Personalization.Commerce.Tracking;
+using Vipps.Polling;
 using Vipps.Services;
 
 namespace EPiServer.Reference.Commerce.Site.Infrastructure
@@ -93,7 +94,9 @@ namespace EPiServer.Reference.Commerce.Site.Infrastructure
             services.AddTransient<IVippsPaymentService, VippsPaymentService>();
             services.AddTransient<IVippsRequestFactory, DefaultVippsRequestFactory>();
             services.AddTransient<IVippsResponseFactory, DefaultVippsResponseFactory>();
-            services.AddSingleton<IVippsOrderCreator, DefaultVippsOrderCreator>();
+            services.AddSingleton<IVippsOrderSynchronizer, DefaultVippsOrderSynchronizer>();
+            services.AddSingleton<IVippsOrderProcessor, DefaultVippsOrderProcessor>();
+            services.AddSingleton<IVippsPollingService, VippsPollingService>();
 
             services.AddSingleton<ServiceAccessor<IContentRouteHelper>>(locator => locator.GetInstance<IContentRouteHelper>);
 

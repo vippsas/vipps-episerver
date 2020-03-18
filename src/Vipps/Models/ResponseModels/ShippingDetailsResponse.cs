@@ -13,6 +13,6 @@ namespace Vipps.Models.ResponseModels
         public string OrderId { get; set; }
 
         [JsonProperty("shippingDetails")]
-        public IEnumerable<ShippingDetail> ShippingDetails { get; set; }
+        public IEnumerable<ShippingDetails> ShippingDetails { get; set; }
     }
 }

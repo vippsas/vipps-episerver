@@ -2,6 +2,7 @@
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using EPiServer.Commerce.Catalog.ContentTypes;
@@ -42,9 +43,9 @@ namespace EPiServer.Reference.Commerce.Site.Features.Checkout.Controllers
             _vippsService = vippsService;
         }
 
-        public async Task<RedirectResult> Index(string orderId, string contactId, string marketId)
+        public async Task<RedirectResult> Index(string orderId, string contactId, string marketId, string cartName)
         {
-            var result = await _vippsPaymentService.ProcessAuthorizationAsync(Guid.Parse(contactId), marketId, orderId);
+            var result = await _vippsPaymentService.ProcessAuthorizationAsync(Guid.Parse(contactId), marketId, cartName, orderId);
 
             //If ProcessAuthorization fails user needs to be redirected back to checkout or product page
             if (!result.Processed)
@@ -61,7 +62,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.Checkout.Controllers
                 //Redirect back to product if express checkout (preferably with error message)
                 if (result.PaymentType == VippsPaymentType.PRODUCTEXPRESS)
                 {
-                    var cart = _vippsService.GetCartByContactId(contactId, marketId, orderId);
+                    var cart = _vippsService.GetCartByContactId(contactId, marketId, cartName);
                     var item = cart.GetFirstForm().GetAllLineItems().FirstOrDefault();
                     var itemContentLink = _referenceConverter.GetContentLink(item?.Code);
                     var entryContent = _contentLoader.Get<EntryContentBase>(itemContentLink);
@@ -109,23 +110,23 @@ namespace EPiServer.Reference.Commerce.Site.Features.Checkout.Controllers
         {
             string errorMessage = string.Empty;
 
-            if (result.ProcessAuthorizationResponseError?.ProcessAuthorizationErrorType == ProcessAuthorizationErrorType.EXCEPTION
-                || result.ProcessAuthorizationResponseError?.ProcessAuthorizationErrorType == ProcessAuthorizationErrorType.ORDERVALIDATIONERROR)
+            if (result?.ProcessResponseErrorType == ProcessResponseErrorType.EXCEPTION
+                || result?.ProcessResponseErrorType == ProcessResponseErrorType.ORDERVALIDATIONERROR)
             {
-                errorMessage = result.ProcessAuthorizationResponseError.ErrorMessage;
+                errorMessage = result.ErrorMessage;
             }
 
-            else if (result.ProcessAuthorizationResponseError?.ProcessAuthorizationErrorType == ProcessAuthorizationErrorType.INITIATEFAILED)
+            else if (result?.ProcessResponseErrorType == ProcessResponseErrorType.FAILED)
             {
                 //errorMessage = _myLocalizationService.GetString("vipps/initiatefailed");
             }
 
-            else if (result.ProcessAuthorizationResponseError?.ProcessAuthorizationErrorType == ProcessAuthorizationErrorType.NOCARTFOUND)
+            else if (result?.ProcessResponseErrorType == ProcessResponseErrorType.NOCARTFOUND)
             {
                 //errorMessage = _myLocalizationService.GetString("vipps/nocartfound");
             }
 
-            else if (result.ProcessAuthorizationResponseError?.ProcessAuthorizationErrorType == ProcessAuthorizationErrorType.NOVIPPSPAYMENTINCART)
+            else if (result?.ProcessResponseErrorType == ProcessResponseErrorType.NOVIPPSPAYMENTINCART)
             {
                 //errorMessage = _myLocalizationService.GetString("vipps/novippspaymentincart");
             }

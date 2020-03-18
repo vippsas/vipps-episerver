@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Vipps.Models.Partials
 {
-    public class TransactionInfo
+    public class TransactionInfo : IVippsPaymentDetails
     {
         [JsonProperty("amount")]
         public int Amount { get; set; }

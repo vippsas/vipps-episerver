@@ -21,10 +21,10 @@ namespace Vipps.Services
                 },
                 MerchantInfo = new MerchantInfo
                 {
-                    CallbackPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/{contactId.ToString()}/{marketId}/"),
+                    CallbackPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/{contactId.ToString()}/{marketId}/{orderGroup.Name}"),
                     ConsentRemovalPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/"),
-                    ShippingDetailsPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/{contactId.ToString()}/{marketId}/"),
-                    FallBack = $"{configuration.FallbackUrl}?orderId={orderId}&contactId={contactId.ToString()}&marketId={marketId}",
+                    ShippingDetailsPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/{contactId.ToString()}/{marketId}/{orderGroup.Name}"),
+                    FallBack = $"{configuration.FallbackUrl}?orderId={orderId}&contactId={contactId.ToString()}&marketId={marketId}&cartName={orderGroup.Name}",
                     IsApp = false,
                     MerchantSerialNumber = Convert.ToInt32(configuration.MerchantSerialNumber),
                     PaymentType = GetCheckoutType(orderGroup)
@@ -40,8 +40,8 @@ namespace Vipps.Services
             };
         }
 
-        public virtual UpdatePaymentRequest CreateUpdatePaymentRequest(IPayment payment, IOrderGroup orderGroup, IShipment shipment,
-            VippsConfiguration configuration, string orderId)
+        public virtual UpdatePaymentRequest CreateUpdatePaymentRequest(IPayment payment,
+            VippsConfiguration configuration)
         {
             return new UpdatePaymentRequest
             {
@@ -52,6 +52,22 @@ namespace Vipps.Services
                 Transaction = new Transaction
                 {
                     Amount = payment.Amount.FormatAmountToVipps(),
+                    TransactionText = configuration.TransactionMessage
+                }
+            };
+        }
+
+        public virtual UpdatePaymentRequest CreateUpdatePaymentRequest(VippsConfiguration configuration, TransactionLogHistory transactionLogHistory)
+        {
+            return new UpdatePaymentRequest
+            {
+                MerchantInfo = new MerchantInfo
+                {
+                    MerchantSerialNumber = Convert.ToInt32(configuration.MerchantSerialNumber)
+                },
+                Transaction = new Transaction
+                {
+                    Amount = transactionLogHistory.Amount,
                     TransactionText = configuration.TransactionMessage
                 }
             };

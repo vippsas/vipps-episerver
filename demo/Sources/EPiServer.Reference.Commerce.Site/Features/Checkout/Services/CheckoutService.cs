@@ -20,7 +20,7 @@ using System.Linq;
 using System.Web.Mvc;
 using Vipps;
 using Vipps.Extensions;
-using Vipps.Helpers;
+using Vipps.Models;
 using ModelStateDictionary = System.Web.Mvc.ModelStateDictionary;
 
 namespace EPiServer.Reference.Commerce.Site.Features.Checkout.Services
@@ -114,6 +114,11 @@ namespace EPiServer.Reference.Commerce.Site.Features.Checkout.Services
         {
             try
             {
+                if (cart.GetFirstForm().Payments.FirstOrDefault(x => x.IsVippsPayment()) != null)
+                {
+                    cart.Properties[VippsConstants.VippsPaymentTypeField] = VippsPaymentType.CHECKOUT;
+                }
+
                 var paymentProcessingResults = cart.ProcessPayments(_paymentProcessor, _orderGroupCalculator).ToList();
 
                 if (paymentProcessingResults.Any(r => !r.IsSuccessful))

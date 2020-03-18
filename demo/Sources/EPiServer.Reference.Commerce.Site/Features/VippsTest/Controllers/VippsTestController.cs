@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Web.Mvc;
 using EPiServer.Reference.Commerce.Site.Features.VippsTest.Models;
+using Mediachase.Commerce;
 using Vipps;
 using Vipps.Extensions;
 using Vipps.Helpers;
@@ -13,13 +14,19 @@ namespace EPiServer.Reference.Commerce.Site.Features.VippsTest.Controllers
 {
     public class VippsTestController : Controller
     {
-        private readonly IVippsPaymentService _vippsPaymentService;
         private readonly VippsServiceApiFactory _vippsServiceApiFactory;
+        private readonly IVippsService _vippsService;
+        private readonly IVippsConfigurationLoader _configurationLoader;
+        private readonly ICurrentMarket _currentMarket;
 
-        public VippsTestController(IVippsPaymentService vippsPaymentService, VippsServiceApiFactory vippsServiceApiFactory)
+        public VippsTestController(VippsServiceApiFactory vippsServiceApiFactory,
+            IVippsService vippsService, IVippsConfigurationLoader configurationLoader,
+            ICurrentMarket currentMarket)
         {
-            _vippsPaymentService = vippsPaymentService;
             _vippsServiceApiFactory = vippsServiceApiFactory;
+            _vippsService = vippsService;
+            _configurationLoader = configurationLoader;
+            _currentMarket = currentMarket;
         }
 
         // GET: VippsTest
@@ -33,7 +40,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.VippsTest.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Initiate()
         {
-            var configuration = PaymentHelper.GetVippsPaymentMethodDto().GetVippsConfiguration();
+            var configuration = _configurationLoader.GetConfiguration(_currentMarket.GetCurrentMarket().MarketId);
             var vippsApi = _vippsServiceApiFactory.Create(configuration);
             var viewModel = new VippsTestViewModel();
 
@@ -75,7 +82,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.VippsTest.Controllers
             }
         }
 
-        public ActionResult Fallback(string orderId)
+        public ActionResult Fallback(string orderId, string contactId, string marketId, string cartName)
         {
             var viewModel = new VippsTestViewModel
             {
@@ -87,7 +94,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.VippsTest.Controllers
 
             try
             {
-                var status = _vippsPaymentService.GetOrderStatusAsync(orderId).Result;
+                var status = _vippsService.GetOrderStatusAsync(orderId, marketId).Result;
                 if (status.TransactionInfo.Status == VippsStatusResponseStatus.RESERVE.ToString())
                 {
                     viewModel.Step = VippsUpdatePaymentResponseStatus.Initiate.ToString();
@@ -113,7 +120,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.VippsTest.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Capture(VippsTestViewModel model)
         {
-            var configuration = PaymentHelper.GetVippsPaymentMethodDto().GetVippsConfiguration();
+            var configuration = _configurationLoader.GetConfiguration(_currentMarket.GetCurrentMarket().MarketId);
             var vippsApi = _vippsServiceApiFactory.Create(configuration);
 
             var viewModel = new VippsTestViewModel
@@ -166,7 +173,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.VippsTest.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Refund(VippsTestViewModel model)
         {
-            var configuration = PaymentHelper.GetVippsPaymentMethodDto().GetVippsConfiguration();
+            var configuration = _configurationLoader.GetConfiguration(_currentMarket.GetCurrentMarket().MarketId);
             var vippsApi = _vippsServiceApiFactory.Create(configuration);
 
             var viewModel = new VippsTestViewModel
@@ -219,7 +226,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.VippsTest.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Cancel(VippsTestViewModel model)
         {
-            var configuration = PaymentHelper.GetVippsPaymentMethodDto().GetVippsConfiguration();
+            var configuration = _configurationLoader.GetConfiguration(_currentMarket.GetCurrentMarket().MarketId);
             var vippsApi = _vippsServiceApiFactory.Create(configuration);
 
             var viewModel = new VippsTestViewModel
