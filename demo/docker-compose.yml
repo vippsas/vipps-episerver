@@ -1,0 +1,43 @@
+version: '3.4'
+
+services:
+  vipps-epi-demo-web:
+    image: ${DOCKER_REGISTRY-}vipps-epi-demo-web
+    build:
+      context: Sources\EPiServer.Reference.Commerce.Site
+      dockerfile: Dockerfile
+    networks:
+      vipps-epi-network:
+        ipv4_address: 172.16.238.11
+    depends_on:
+     - vipps-epi-demo-db
+    mac_address: 84-69-95-6C-7F-85
+    volumes:
+      - ./Sources/EPiServer.Reference.Commerce.Site/App_Data/:C:/appdata/
+  vipps-epi-demo-manager:
+    image: ${DOCKER_REGISTRY-}vipps-epi-demo-manager
+    build:
+      context: Sources\EPiServer.Reference.Commerce.Manager
+      dockerfile: Dockerfile
+    networks:
+     vipps-epi-network:
+        ipv4_address: 172.16.238.12
+    depends_on:
+     - vipps-epi-demo-db
+  vipps-epi-demo-db:
+    image: microsoft/mssql-server-windows-developer:1709
+    environment:
+     - ACCEPT_EULA=Y
+     - sa_password=Vipps19Epi
+     - attach_dbs=[{'dbName':'vipps-cms','dbFiles':['C:\\data\\vipps-cms.mdf','C:\\data\\vipps-cms.ldf']},{'dbName':'vipps-commerce','dbFiles':['C:\\data\\vipps-commerce.mdf','C:\\data\\vipps-commerce.ldf']}]
+    volumes:
+      - ./Sources/EPiServer.Reference.Commerce.Site/App_Data/:C:/data/
+    networks:
+     vipps-epi-network:
+        ipv4_address: 172.16.238.13
+networks:
+  vipps-epi-network:
+    ipam:
+      driver: default
+      config:
+         - subnet: '172.16.238.0/24'
