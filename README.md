@@ -149,8 +149,8 @@ public override async Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
 - User clicks "Vipps Hurtigkasse" button on product page
 - A cart with a different cart name then your default cart name is created and product is added to cart (to persist customers original cart)
 - A flag with "VippsPaymentType" is saved on cart
-- Initiate call to vipps api
-- User get's redirected to vipps portal and enters their phone number
+- Initiate call to the Vipps API
+- User gets redirected to the Vipps landing page and enters their phone number (if using a phone the Vipps app will be automatically opened instead)
 - User opens the app
 - A call to the shipping details endpoint is made and the available shipping methods and prices are returned
 - User chooses shipping method and confirms the payment
@@ -161,8 +161,8 @@ public override async Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
 
 - User clicks "Vipps Hurtigkasse" button on product page
 - A flag with "VippsPaymentType" is saved on cart
-- Initiate call to vipps api
-- User get's redirected to vipps portal and enters their phone number
+- Initiate call to the Vipps API
+- User gets redirected to Vipps landing page and enters their phone number (if using a phone the Vipps app will be automatically opened instead)
 - User opens the app
 - A call to the shipping details endpoint is made and the available shipping methods and prices are returned
 - User chooses shipping method and confirms the payment
@@ -175,8 +175,8 @@ public override async Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
 - The customers WishList cart is loaded
 - A cart with a different cart name then your default cart name is created and all products from wishlist are added (to persist customers original/wishlist cart)
 - A flag with "VippsPaymentType" is saved on cart
-- Initiate call to vipps api
-- User get's redirected to vipps portal and enters their phone number
+- Initiate call to the Vipps API
+- User gets redirected to Vipps landing page and enters their phone number (if using a phone the Vipps app will be automatically opened instead)
 - User opens the app
 - A call to the shipping details endpoint is made and the available shipping methods and prices are returned
 - User chooses shipping method and confirms the payment
