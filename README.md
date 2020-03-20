@@ -2,7 +2,7 @@
 # Vipps for EPiServer
 
 ## Description
-Vipps payments and Vipps Express Checkout for Episerver Commerce
+Vipps payments and Vipps Express Checkout for Episerver Commerce.
 
 ## Features
  - Payment gateway for Vipps payments in checkout.
@@ -34,11 +34,11 @@ Login into Commerce Manager and open **Administration -> Order System -> Payment
 
 #### Paramaters
 
- - **Client Id** - Can be obtained through Vipps developer portal
- - **Client Secret**- Can be obtained through Vipps developer portal
- - **Subscription Key** - Can be obtained through Vipps developer portal
- - **Serial number** - Ypur merchant Serial number, can be obtained through Vipps developer portal
- - **Api Url** - Vipps api url (test or prod)
+ - **Client Id** - Can be obtained through portal.vipps.no
+ - **Client Secret**- Can be obtained through portal.vipps.no
+ - **Subscription Key** - Can be obtained through portal.vipps.no
+ - **Serial number** - Your merchant Serial number, can be obtained through portal.vipps.no
+ - **Api Url** - Vipps API URL (test or prod)
  - **Site Base Url** - The url for your site. (used to generate callback urls)
  - **Fallback Url** - Url to your fallback controller
 
@@ -60,10 +60,10 @@ services.AddSingleton<IVippsPollingService, VippsPollingService>();
 It is important that IVippsOrderCreator is registered as a singleton.
 
 ### Fallback controller
-Must be implemented in your project. 
-The package automatically appends the generated order id as a querystring to the specified url. The quicksilver example implementation can be found [here](demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs)
+Must be implemented in your project.
+The package automatically appends the generated order id as a query string to the specified URL. The quicksilver example implementation can be found [here](demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs)
 
-ProcessAuthorizationAsync method on IVippsPaymentServices will return the created purchase order for you if the callback from Vipps was successfull. If not, it will ensure all the correct information is on the payment and shimpent objects and then create the purchase order.
+ProcessAuthorizationAsync method on IVippsPaymentServices will return the created purchase order for you if the callback from Vipps was successfull. If not, it will ensure all the correct information is on the payment and shipment objects and then create the purchase order.
 **No validation against tempering with the cart line items is done within the package**
 
 ```
@@ -81,7 +81,8 @@ This determines where the fallbackcontroller should redirect if processAuthoriza
 Back to checkout, product, wishlist or cart page.
 
 If the payment is processed and the paymenttype is WISHLISTEXPRESS, you might also consider finding the customers wishlist cart and deleting it in the fallback controller.
-*Note that this only applies to Express payments. If you are only using vipps in the checkout, VippsPaymentType will always be CHECKOUT and the redirect action will be determined by if the payment succeeded or not.*
+
+*Note that this only applies to Express payments. If you are only using Vipps in the checkout, VippsPaymentType will always be CHECKOUT and the redirect action will be determined by if the payment succeeded or not.*
 
 The ProcessAuthorizationResponse also contains a possible error message as well as a ProcessResponseErrorType enum.
  - NONE
@@ -93,24 +94,28 @@ The ProcessAuthorizationResponse also contains a possible error message as well 
  - OTHER
 
 ### Polling
-The package includes polling the vipps api to ensure that the payment is handled, even if user closes the browser tab before redirect and a callback from vipps is not received.
- - Polling is started when a user is redirected to vipps.
+
+The package includes polling the Vipps API to ensure that the payment is handled, even if user closes the browser tab before redirect and a callback from Vipps is not received.
+ - Polling is started when a user is redirected to Vipps.
  - Polling is active for up to ten minutes
  - If a payment has a status that we can act upon polling stops.
- - Set polling interval by adding Vipps:PollingInterval app setting in web config (in milliseconds). Default is 2000ms
- 
- #### Order validation
-No order validation is included in this package to protect from f.ex. cart tempering. It is **highly** recommended that you implement your own order validation. 
+ - Set polling interval by adding Vipps:PollingInterval app setting in web config (in milliseconds). Default is 2000ms.
+
+#### Order validation
+
+No order validation is included in this package to protect from f.ex. cart
+tempering. It is **highly** recommended that you implement your own order validation.
 Override CreatePurchaseOrder method in DefaultVippsOrderProcessor class.
 
 **Example:** (assuming MyOrderService handles all the order validation)
-´´´
+
+```
 public override async Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
         {
             try
             {
 				var respone = _myOrderService.CreatePurchaseOrder(cart);
-				
+
 				if (response.Success)
 				{
 					return new ProcessOrderResponse
@@ -118,7 +123,7 @@ public override async Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
 						PurchaseOrder = response.PurcaseOrder
 					};
 				}
-				
+
 				return new ProcessOrderResponse
 				{
 					ProcessResponseErrorType = ProcessResponseErrorType.ORDERVALIDATIONERROR,
@@ -135,10 +140,12 @@ public override async Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
                 };
             }
         }
-´´´
+```
 
 ## Express payments
+
 ### Express payments workflow (Product page)
+
 - User clicks "Vipps Hurtigkasse" button on product page
 - A cart with a different cart name then your default cart name is created and product is added to cart (to persist customers original cart)
 - A flag with "VippsPaymentType" is saved on cart
@@ -151,6 +158,7 @@ public override async Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
 - User gets redirected to fallback controller
 
 ### Express payments workflow (Cart page/review)
+
 - User clicks "Vipps Hurtigkasse" button on product page
 - A flag with "VippsPaymentType" is saved on cart
 - Initiate call to vipps api
@@ -162,6 +170,7 @@ public override async Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
 - User gets redirected to fallback controller
 
 ### Express payments workflow (Wish list page/review)
+
 - User clicks "Vipps Hurtigkasse" button on product page
 - The customers WishList cart is loaded
 - A cart with a different cart name then your default cart name is created and all products from wishlist are added (to persist customers original/wishlist cart)
@@ -175,9 +184,11 @@ public override async Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
 - User gets redirected to fallback controller
 
 ### Callbacks
+
 The code being run on all callbacks is in DefaultVippsResponseFactory, if you need to customize any of this behaviour, just create a new class that inherits from DefaultVippsResponseFactory, override the relevant methods and register it in your initialization module as your implementation of IVippsResponseFactory
 
 ### Express controller
+
 An api controller for initializing an express checkout is included in the package. This controller contains basic add to cart functionality for express checkout on product pages, but if you want to use your own cart workflow you will need to create your own controller for this.
 
 If you want to use the express checkout in your cart preview, the controller will try and look for a cart named "Default". So if the default cart name for your site is something else, you also need to implement your own controller.
@@ -186,15 +197,16 @@ The controller has three methods:
  - GET vippsexpress/cartexpress
  - GET vippsexpress/wishlistexpress
  - POST vippsexpress/productexpress?code={code}&quantity={quantity}
- 
+
  In return you get a ExpressCheckoutResponse with three properties
   - Success
   - ErrorMessage
   - RedirectUrl
-  
+
  For the simplest possible frontend implementation of this using jquery and ajax. See [VippsExpress.js](demo/Sources/EPiServer.Reference.Commerce.Site/Scripts/js/VippsExpress.js) and [Product/Index](/demo/Sources/EPiServer.Reference.Commerce.Site/Views/Product/Index.cshtml)
 
 ### Implement your own Express Checkout (Api) Controller
+
 If you need to implement your own version of the Express Checkout Controller, which in a majority of cases would be the recommended route, there are a few things that are important to keep in mind:
 
 **Cart metafield "VippsPaymentType" must be set before processing the payment**
@@ -215,7 +227,7 @@ PaymentHelper will help you create and add a Vipps payment to the cart. It has t
 ## More info
 
  - [Vipps Developer Resources](https://github.com/vippsas/vipps-developers)
- - [Vipps eCommere API](https://github.com/vippsas/vipps-ecom-api/blob/master/vipps-ecom-api.md)
+ - [Vipps eCommere API](https://github.com/vippsas/vipps-ecom-api/)
  - [Frequently Asked Questions for Vipps eCommerce API](https://github.com/vippsas/vipps-ecom-api/blob/master/vipps-ecom-api-faq.md)
 
 ## Demo site
