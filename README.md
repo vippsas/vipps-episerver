@@ -57,7 +57,7 @@ services.AddSingleton<IVippsOrderProcessor, DefaultVippsOrderProcessor>();
 services.AddSingleton<IVippsPollingService, VippsPollingService>();
 ```
 
-It is important that IVippsOrderCreator is registered as a singleton.
+It is important that IVippsOrderSynchronizer, IVippsOrderProcessor and IVippsPollingService is registered as singletons.
 
 ### Fallback controller
 
@@ -65,7 +65,7 @@ Must be implemented in your project.
 
 The package automatically appends the generated order id as a query string to the specified URL. The quicksilver example implementation can be found [here](demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs)
 
-`ProcessAuthorizationAsync` method on `IVippsPaymentServices` will return the created purchase order for you if the callback from Vipps was successfull. If not, it will ensure all the correct information is on the payment and shipment objects and then create the purchase order.
+`ProcessAuthorizationAsync` method on `IVippsPaymentService` will return the created purchase order for you if the callback from Vipps was successfull. If not, it will ensure all the correct information is on the payment and shipment objects and then create the purchase order.
 **No validation against tempering with the cart line items is done within the package**
 
 ```
