@@ -10,5 +10,6 @@
         public string SiteBaseUrl { get; set; }
         public string FallbackUrl {get; set; }
         public string TransactionMessage { get; set; }
+        public string MarketId { get; set; }
     }
 }

@@ -11,6 +11,13 @@ namespace Vipps.Services
     [ServiceConfiguration(typeof(IVippsRequestFactory))]
     public class DefaultVippsRequestFactory : IVippsRequestFactory
     {
+        private readonly IVippsOrderSynchronizer _vippsOrderSynchronizer;
+
+        public DefaultVippsRequestFactory(IVippsOrderSynchronizer vippsOrderSynchronizer)
+        {
+            _vippsOrderSynchronizer = vippsOrderSynchronizer;
+        }
+
         public virtual InitiatePaymentRequest CreateInitiatePaymentRequest(IPayment payment, IOrderGroup orderGroup, VippsConfiguration configuration, string orderId, Guid contactId, string marketId)
         {
             return new InitiatePaymentRequest
@@ -21,10 +28,11 @@ namespace Vipps.Services
                 },
                 MerchantInfo = new MerchantInfo
                 {
+                    AuthToken = _vippsOrderSynchronizer.GetInstanceId(),
                     CallbackPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/{contactId.ToString()}/{marketId}/{orderGroup.Name}"),
                     ConsentRemovalPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/"),
                     ShippingDetailsPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/{contactId.ToString()}/{marketId}/{orderGroup.Name}"),
-                    FallBack = $"{configuration.FallbackUrl}?orderId={orderId}&contactId={contactId.ToString()}&marketId={marketId}&cartName={orderGroup.Name}",
+                    FallBack = $"{configuration.FallbackUrl}?orderId={orderId}&contactId={contactId}&marketId={marketId}&cartName={orderGroup.Name}",
                     IsApp = false,
                     MerchantSerialNumber = Convert.ToInt32(configuration.MerchantSerialNumber),
                     PaymentType = GetCheckoutType(orderGroup)

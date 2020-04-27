@@ -31,12 +31,14 @@ namespace Vipps.Models.ResponseModels
         public string Resources { get; set; }
 
         [JsonProperty("access_token")]
-        public string AccesToken { get; set; }
+        public string AccessToken { get; set; }
 
         public bool IsExpired()
         {
             // Add a few seconds to DateTime.Now because we'd rather refresh the token a bit too early
             return DateTime.Now.AddSeconds(30) > _createdAt.AddSeconds(Convert.ToInt32(ExpiresIn));
         }
+
+        public string MarketId { get; set; }
     }
 }

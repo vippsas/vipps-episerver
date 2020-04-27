@@ -12,6 +12,7 @@
     <tags>EPiServer Commerce</tags>
     <dependencies>
       <dependency id="EPiServer.Commerce.Core" version="[13.0, 14)" />
+      <dependency id="Vipps" version="$version$" />
     </dependencies>
   </metadata>
 </package>

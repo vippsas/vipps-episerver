@@ -142,8 +142,6 @@ namespace Vipps.Services
                 };
             }
 
-            payment.Status = PaymentStatus.Failed.ToString();
-            _orderRepository.Save(cart);
             return new ProcessOrderResponse
             {
                 ProcessResponseErrorType = ProcessResponseErrorType.NONE

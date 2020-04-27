@@ -128,5 +128,10 @@ namespace Vipps.Services
                     throw;
             }
         }
+
+        public virtual string GetInstanceId()
+        {
+            return Environment.GetEnvironmentVariable("WEBSITE_INSTANCE_ID");
+        }
     }
 }

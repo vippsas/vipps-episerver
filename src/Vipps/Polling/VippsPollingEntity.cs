@@ -11,6 +11,7 @@ namespace Vipps.Polling
         public string CartName { get; set; }
         public string MarketId { get; set; }
         public DateTime Created { get; set; }
+        public string InstanceId { get; set; }
 
         public VippsPollingEntity()
         {

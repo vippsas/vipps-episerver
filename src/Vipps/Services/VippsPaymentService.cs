@@ -69,13 +69,7 @@ namespace Vipps.Services
                 OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
                     $"Vipps payment initiated. Vipps reference: {initiatePaymentRequest.Transaction.OrderId}");
 
-                _vippsPollingService.Start(new VippsPollingEntity
-                {
-                    OrderId = orderId,
-                    CartName = orderGroup.Name,
-                    ContactId = orderGroup.CustomerId,
-                    MarketId = orderGroup.MarketId.Value
-                });
+                _vippsPollingService.Start(orderId, orderGroup);
 
                 return PaymentProcessingResult.CreateSuccessfulResult("", response.Url);
             }

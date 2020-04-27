@@ -14,7 +14,6 @@ namespace Vipps
     public class AuthenticatedHttpClientHandler : HttpClientHandler
     {
         private readonly Func<Task<AuthenticationResponse>> _getToken;
-        protected AuthenticationResponse _authenticationResponse;
 
         public AuthenticatedHttpClientHandler(Func<Task<AuthenticationResponse>> getToken)
         {
@@ -23,12 +22,8 @@ namespace Vipps
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            if (_authenticationResponse == null || _authenticationResponse.IsExpired())
-            {
-                _authenticationResponse = await _getToken().ConfigureAwait(false);
-            }
-
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", $"{_authenticationResponse.AccesToken}");
+            var authentication = await _getToken().ConfigureAwait(false);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", $"{authentication.AccessToken}");
             return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
     }

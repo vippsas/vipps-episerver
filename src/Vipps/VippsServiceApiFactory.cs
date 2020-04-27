@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using EPiServer.Logging;
@@ -10,13 +12,15 @@ namespace Vipps
 {
     public class VippsServiceApiFactory
     {
-        private static IVippsApi _vippsApi;
+        private static Dictionary<string, IVippsApi> _marketApiDictionary = new Dictionary<string, IVippsApi>();
         private VippsConfiguration _configuration;
+        private static IList<AuthenticationResponse> _authenticationResponses = new List<AuthenticationResponse>();
         private readonly ILogger _logger = LogManager.GetLogger(typeof(VippsServiceApiFactory));
 
         public IVippsApi Create(VippsConfiguration configuration)
         {
-            if (_vippsApi == null)
+            var vippsApi = _marketApiDictionary.FirstOrDefault(x => x.Key == configuration.MarketId).Value;
+            if (vippsApi == null)
             {
                 _configuration = configuration;
                 var client = new HttpClient(new AuthenticatedHttpClientHandler(GetToken))
@@ -26,14 +30,22 @@ namespace Vipps
 
                 client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", _configuration.SubscriptionKey);
 
-                _vippsApi = RestService.For<IVippsApi>(client);
+                vippsApi = RestService.For<IVippsApi>(client);
+                _marketApiDictionary.Add(configuration.MarketId, vippsApi);
             }
 
-            return _vippsApi;
+            return vippsApi;
         }
 
         private async Task<AuthenticationResponse> GetToken()
         {
+            var existingResponse = _authenticationResponses.FirstOrDefault(x => x.MarketId == _configuration.MarketId &&  !x.IsExpired());
+
+            if (existingResponse != null)
+            {
+                return existingResponse;
+            }
+
             var authenticationResponse = new AuthenticationResponse();
             var client = new HttpClient
             {
@@ -51,6 +63,10 @@ namespace Vipps
                 response.EnsureSuccessStatusCode();
                 authenticationResponse =
                     JsonConvert.DeserializeObject<AuthenticationResponse>(await response.Content.ReadAsStringAsync());
+                authenticationResponse.MarketId = _configuration.MarketId;
+                _authenticationResponses.Remove(
+                    _authenticationResponses.FirstOrDefault(x => x.MarketId == _configuration.MarketId));
+                _authenticationResponses.Add(authenticationResponse);
             }
 
             catch (Exception ex)

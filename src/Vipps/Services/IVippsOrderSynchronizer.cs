@@ -7,5 +7,6 @@ namespace Vipps.Services
     {
         void Remove(string orderId);
         SemaphoreSlim Get(string orderId);
+        string GetInstanceId();
     }
 }
