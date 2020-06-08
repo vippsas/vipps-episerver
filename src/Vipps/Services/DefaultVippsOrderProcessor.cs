@@ -123,7 +123,7 @@ namespace Vipps.Services
             {
                 AddNote(cart, orderId, paymentDetails);
             }
-            
+
             return new ProcessOrderResponse
             {
                 ProcessResponseErrorType = ProcessResponseErrorType.FAILED
@@ -161,7 +161,7 @@ namespace Vipps.Services
                 };
             }
 
-            EnsureExpressPaymentAndShipping(cart, payment, userDetails);
+            EnsureExpressPaymentAndShipping(cart, payment, paymentDetails, userDetails);
             payment.Status = PaymentStatus.Processed.ToString();
             AddNote(cart, payment, orderId, paymentDetails);
 
@@ -185,14 +185,14 @@ namespace Vipps.Services
 
             if (paymentDetails is TransactionInfo transactionInfo)
             {
-                return transactionInfo.Status == VippsCallbackStatus.SALE_FAILED.ToString() 
-                        || transactionInfo.Status == VippsCallbackStatus.RESERVE_FAILED.ToString() 
+                return transactionInfo.Status == VippsCallbackStatus.SALE_FAILED.ToString()
+                        || transactionInfo.Status == VippsCallbackStatus.RESERVE_FAILED.ToString()
                         || transactionInfo.Status == VippsCallbackStatus.REJECTED.ToString();
             }
 
             throw new InvalidCastException(nameof(paymentDetails));
 
-            
+
         }
 
         private bool TransactionCancelled(IVippsPaymentDetails paymentDetails)
@@ -260,7 +260,7 @@ namespace Vipps.Services
 
             if (paymentDetails is TransactionInfo transactionInfo)
             {
-                return transactionInfo.Status == VippsCallbackStatus.RESERVED.ToString() 
+                return transactionInfo.Status == VippsCallbackStatus.RESERVED.ToString()
                        || transactionInfo.Status == VippsCallbackStatus.SALE.ToString()
                        || transactionInfo.Status == VippsCallbackStatus.RESERVE.ToString();
             }
@@ -301,32 +301,28 @@ namespace Vipps.Services
             }
         }
 
-        public void EnsureExpressPaymentAndShipping(ICart cart, IPayment payment, IVippsUserDetails userDetails)
+        public void EnsureExpressPaymentAndShipping(ICart cart, IPayment payment, IVippsPaymentDetails paymentDetails, IVippsUserDetails userDetails)
         {
-            if (cart.GetFirstShipment().ShippingMethodId == default(Guid) ||
-                cart.GetFirstShipment().ShippingAddress == null ||
-                payment?.BillingAddress == null)
-            {
-                EnsureShipping(cart, userDetails);
-                EnsureBillingAddress(payment, cart, userDetails);
-                _orderRepository.Save(cart);
-            }
+            EnsureShipping(cart, userDetails);
+            EnsurePayment(payment, cart, paymentDetails, userDetails);
         }
 
-        private static void EnsureBillingAddress(IPayment payment, ICart cart, IVippsUserDetails details)
+        private static void EnsurePayment(IPayment payment, ICart cart, IVippsPaymentDetails paymentDetails, IVippsUserDetails details)
         {
             if (string.IsNullOrEmpty(payment.BillingAddress?.Id))
             {
                 payment.BillingAddress =
                     AddressHelper.UserDetailsAndShippingDetailsToOrderAddress(details.UserDetails,
                         details.ShippingDetails, cart);
+                payment.Amount = paymentDetails.Amount.FormatAmountFromVipps();
             }
         }
 
         private static void EnsureShipping(ICart cart, IVippsUserDetails details)
         {
             var shipment = cart.GetFirstShipment();
-            if (shipment.ShippingMethodId == default(Guid))
+            if (details?.ShippingDetails?.ShippingMethodId != null &&
+                (shipment.ShippingMethodId == default(Guid) || shipment.ShippingMethodId.ToString() != details.ShippingDetails.ShippingMethodId))
             {
                 if (details?.ShippingDetails?.ShippingMethodId != null)
                 {
