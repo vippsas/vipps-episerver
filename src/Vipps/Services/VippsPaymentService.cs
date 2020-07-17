@@ -97,11 +97,12 @@ namespace Vipps.Services
             try
             {
                 var orderId = payment.TransactionID;
+                var idempotencyKey = GetIdempotencyKey(orderGroup, payment, orderId);
                 var serviceApi = _vippsServiceApiFactory.Create(configuration);
 
                 var capturePaymentRequest =
                     _requestFactory.CreateUpdatePaymentRequest(payment, configuration);
-                var response = await serviceApi.Capture(orderId, capturePaymentRequest).ConfigureAwait(false);
+                var response = await serviceApi.Capture(orderId, capturePaymentRequest, idempotencyKey).ConfigureAwait(false);
 
                 if (response.TransactionInfo.Status == VippsUpdatePaymentResponseStatus.Captured.ToString())
                 {
@@ -203,6 +204,7 @@ namespace Vipps.Services
 
             catch (Exception ex)
             {
+                payment.Status = PaymentStatus.Failed.ToString();
                 _logger.Log(Level.Error, $"{ex.Message}, {ex.StackTrace}");
                 OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps cancel payment failed. Error message: {ex.Message}");
                 return PaymentProcessingResult.CreateUnsuccessfulResult(ex.Message);
@@ -274,6 +276,11 @@ namespace Vipps.Services
             }
 
             return VippsPaymentType.CHECKOUT;
+        }
+
+        private string GetIdempotencyKey(IOrderGroup orderGroup, IPayment payment, string orderId)
+        {
+            return $"{orderId}-{string.Format("{0:0.00}", orderGroup.GetFirstForm().CapturedPaymentTotal)}-{string.Format("{0:0.00}", payment.Amount)}";
         }
 
         #endregion

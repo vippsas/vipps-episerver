@@ -56,7 +56,7 @@ namespace Vipps.Controllers
                 return GetUnsuccessfulResult("No wish list found");
             }
 
-            var cart = _orderRepository.LoadOrCreateCart<ICart>(PrincipalInfo.CurrentPrincipal.GetContactId(),
+            var cart =  _orderRepository.LoadOrCreateCart<ICart>(PrincipalInfo.CurrentPrincipal.GetContactId(),
                 VippsConstants.VippsSingleProductCart);
             VippsExpressCartHelper.RemoveAllLineItems(cart);
 
@@ -75,7 +75,7 @@ namespace Vipps.Controllers
         [ResponseType(typeof(ExpressCheckoutResponse))]
         public IHttpActionResult ProductExpress(string code, decimal quantity)
         {
-            var cart = _orderRepository.LoadOrCreateCart<ICart>(PrincipalInfo.CurrentPrincipal.GetContactId(),
+            var cart =  _orderRepository.LoadOrCreateCart<ICart>(PrincipalInfo.CurrentPrincipal.GetContactId(),
                 VippsConstants.VippsSingleProductCart);
 
             VippsExpressCartHelper.RemoveAllLineItems(cart);
@@ -117,13 +117,13 @@ namespace Vipps.Controllers
 
                 if (successfulResult != null)
                 {
-                    return GetSuccessfulResult(paymentProcessingResults.FirstOrDefault(x => x.IsSuccessful) ?? paymentProcessingResults.FirstOrDefault());
+                    return GetSuccessfulResult(paymentProcessingResults.FirstOrDefault(x=>x.IsSuccessful) ?? paymentProcessingResults.FirstOrDefault());
                 }
 
                 return GetUnsuccessfulResult(paymentProcessingResults.FirstOrDefault(x => !string.IsNullOrEmpty(x.Message))?.Message);
             }
 
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 _logger.Error($"{ex.Message} {ex.StackTrace}");
                 return GetUnsuccessfulResult(ex.Message);
@@ -148,5 +148,5 @@ namespace Vipps.Controllers
                 RedirectUrl = paymentProcessingResult.RedirectUrl
             });
         }
-    }
+}
 }

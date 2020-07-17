@@ -11,7 +11,7 @@ namespace Vipps
         Task<InitiatePaymentResponse> Initiate([Body]InitiatePaymentRequest initiatePaymentRequest);
 
         [Post("/ecomm/v2/payments/{orderId}/capture")]
-        Task<UpdatePaymentResponse> Capture([AliasAs("orderId")]string orderId, [Body]UpdatePaymentRequest capturePaymentRequest);
+        Task<UpdatePaymentResponse> Capture([AliasAs("orderId")]string orderId, [Body]UpdatePaymentRequest capturePaymentRequest, [Header("X-Request-Id")] string idempotencyKey);
 
         [Put("/ecomm/v2/payments/{orderId}/cancel")]
         Task<UpdatePaymentResponse> Cancel([AliasAs("orderId")]string orderId, [Body]UpdatePaymentRequest capturePaymentRequest);

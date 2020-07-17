@@ -78,6 +78,7 @@ namespace Vipps.Polling
                     {
                         if (entity.Created.AddMinutes(-10) < DateTime.Now)
                         {
+                            _logger.Debug($"Running polling for entity with orderId: {entity.OrderId} and instanceId: {entity.InstanceId} on instance {instanceId}");
                             var orderDetails = await _vippsService.GetOrderDetailsAsync(entity.OrderId, entity.MarketId);
                             if (orderDetails == null)
                             {
