@@ -6,14 +6,12 @@ using Vipps.Polling;
 
 namespace Vipps.Initialization
 {
-    [InitializableModule]
-    [ModuleDependency(typeof(EPiServer.Commerce.Initialization.InitializationModule))]
-    internal class PollingInitialization : IInitializableModule
+    public static class PollingInitialization
     {
-        private Timer _timer = new Timer();
-        private IVippsPollingService _pollingService;
+        private static Timer _timer = new Timer();
+        private static IVippsPollingService _pollingService;
 
-        public void Initialize(InitializationEngine context)
+        public static void Initialize(InitializationEngine context)
         {
             _pollingService = context.Locate.Advanced.GetInstance<IVippsPollingService>();
             _timer.Interval = double.TryParse(ConfigurationManager.AppSettings["Vipps:PollingInterval"], out var pollingInterval) ? pollingInterval : 2000;
@@ -21,13 +19,13 @@ namespace Vipps.Initialization
             _timer.Elapsed += ExecutePolling;
         }
 
-        private void ExecutePolling(object sender, ElapsedEventArgs e)
+        public static void ExecutePolling(object sender, ElapsedEventArgs e)
         {
             _pollingService.Run();
         }
 
 
-        public void Uninitialize(InitializationEngine context)
+        public static void Uninitialize(InitializationEngine context)
         {
 
         }

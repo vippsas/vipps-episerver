@@ -123,7 +123,7 @@ namespace Vipps.Services
             {
                 AddNote(cart, orderId, paymentDetails);
             }
-
+            
             return new ProcessOrderResponse
             {
                 ProcessResponseErrorType = ProcessResponseErrorType.FAILED
@@ -185,14 +185,14 @@ namespace Vipps.Services
 
             if (paymentDetails is TransactionInfo transactionInfo)
             {
-                return transactionInfo.Status == VippsCallbackStatus.SALE_FAILED.ToString()
-                        || transactionInfo.Status == VippsCallbackStatus.RESERVE_FAILED.ToString()
+                return transactionInfo.Status == VippsCallbackStatus.SALE_FAILED.ToString() 
+                        || transactionInfo.Status == VippsCallbackStatus.RESERVE_FAILED.ToString() 
                         || transactionInfo.Status == VippsCallbackStatus.REJECTED.ToString();
             }
 
             throw new InvalidCastException(nameof(paymentDetails));
 
-
+            
         }
 
         private bool TransactionCancelled(IVippsPaymentDetails paymentDetails)
@@ -260,7 +260,7 @@ namespace Vipps.Services
 
             if (paymentDetails is TransactionInfo transactionInfo)
             {
-                return transactionInfo.Status == VippsCallbackStatus.RESERVED.ToString()
+                return transactionInfo.Status == VippsCallbackStatus.RESERVED.ToString() 
                        || transactionInfo.Status == VippsCallbackStatus.SALE.ToString()
                        || transactionInfo.Status == VippsCallbackStatus.RESERVE.ToString();
             }
@@ -330,11 +330,11 @@ namespace Vipps.Services
                 }
             }
 
-            if (string.IsNullOrEmpty(shipment.ShippingAddress?.Id))
+            if (details?.ShippingDetails != null && details.UserDetails != null)
             {
                 shipment.ShippingAddress =
-                    AddressHelper.UserDetailsAndShippingDetailsToOrderAddress(details?.UserDetails,
-                        details?.ShippingDetails, cart);
+                    AddressHelper.UserDetailsAndShippingDetailsToOrderAddress(details.UserDetails,
+                        details.ShippingDetails, cart);
             }
         }
     }

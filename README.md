@@ -108,6 +108,23 @@ The package includes polling the Vipps API to ensure that the payment is handled
 No order validation is included in this package to protect from f.ex. cart
 tempering. It is **highly** recommended that you implement your own order validation.
 Override the `CreatePurchaseOrder` method in the `DefaultVippsOrderProcessor` class.
+#### Initialize polling
+```
+[InitializableModule]
+[ModuleDependency(typeof(EPiServer.Commerce.Initialization.InitializationModule))]
+internal class VippsPollingInitialization : IInitializableModule
+{
+	public void Initialize(InitializationEngine context)
+    {
+       PollingInitialization.Initialize(context);
+    }
+
+    public void Uninitialize(InitializationEngine context)
+    {
+		
+    }
+}
+```
 
 **Example:** (assuming MyOrderService handles all the order validation)
 
@@ -249,6 +266,9 @@ A form has been added to [product index](/demo/Sources/EPiServer.Reference.Comme
 
 **Frontend for Vipps Express Checkout api call**
 Simple jquery/ajax [VippsExpress.js](demo/Sources/EPiServer.Reference.Commerce.Site/Scripts/js/VippsExpress.js)
+
+**Polling Initialization**
+Initialize polling on the site as in example above [VippsPollingInitialization.cs](/demo/Sources/EPiServer.Reference.Commerce.Site/Infrastructure/VippsPollingInitialization.cs)
 
 ## Local development environment
 
