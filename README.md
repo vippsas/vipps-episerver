@@ -8,6 +8,8 @@ Vipps payments and Vipps Express Checkout for Episerver Commerce.
  - Payment gateway for Vipps payments in checkout.
  - Vipps Express Checkout functionality.
 
+## Documentation
+
  - [Install and configure](docs/CONFIGURATION.md)
  - [Express payments](docs/EXPRESS.md)
  - [Demo site](docs/DEMOSITE.md)
