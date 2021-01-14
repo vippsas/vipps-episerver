@@ -133,19 +133,21 @@ namespace EPiServer.Reference.Commerce.Site.Features.VippsTest.Controllers
 
             try
             {
-                var result = vippsApi.Capture(model.VippsTestForm.OrderId, new UpdatePaymentRequest
-                {
-                    MerchantInfo = new MerchantInfo
+                var result = vippsApi.Capture(model.VippsTestForm.OrderId,
+                    new UpdatePaymentRequest
                     {
-                        MerchantSerialNumber = Convert.ToInt32(configuration.MerchantSerialNumber)
-                    },
-                    Transaction = new Transaction
-                    {
-                        Amount = 20000,
-                        TransactionText = "Test vipps capture"
-                    }
+                        MerchantInfo = new MerchantInfo
+                        {
+                            MerchantSerialNumber = Convert.ToInt32(configuration.MerchantSerialNumber)
+                        },
+                        Transaction = new Transaction
+                        {
+                            Amount = 20000,
+                            TransactionText = "Test vipps capture"
+                        }
 
-                }).Result;
+                    },
+                    "idempotencyKey").Result;
 
                 if (result.TransactionInfo.Status == VippsUpdatePaymentResponseStatus.Captured.ToString())
                 {
