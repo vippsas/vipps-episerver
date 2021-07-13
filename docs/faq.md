@@ -1,4 +1,4 @@
-#FAQ
+# FAQ
 
 * [I'm having issues with one payment creating two orders](#im-having-issues-with-one-payment-creating-two-orders)
 * [How do I add Vipps as an external payment method in Klarna](#how-do-i-add-vipps-as-an-external-payment-method-in-klarna)
