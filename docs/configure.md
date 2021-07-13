@@ -5,6 +5,7 @@
 - [Configure Commerce Manager](#configure-commerce-manager)
 - [Initialization](#initialization)
 - [Fallback controller](#fallback-controller)
+- [OrderValidation](#order-validation)
 - [Polling](#polling)
 
 ## Installation
@@ -31,7 +32,7 @@ In order to use / work on this package locally you'll need a tool called [ngrok]
 
 - select shipping methods available for this payment
 
-![Payment method settings](docs/screenshots/payment-overview.png "Payment method settings")
+![Payment method settings](screenshots/payment-overview.png "Payment method settings")
 
 ### Paramaters
 
@@ -43,7 +44,7 @@ In order to use / work on this package locally you'll need a tool called [ngrok]
  - **Site Base Url** - The URL for your site (used to generate callback URLs, ngrok generated url if running local dev env)
  - **Fallback Url** - URL to your fallback controller
 
-![Payment method paramaters](docs/screenshots/payment-parameters.png "Payment method settings")
+![Payment method paramaters](screenshots/payment-parameters.png "Payment method settings")
 
 ## Initialization
 
@@ -64,7 +65,7 @@ It is important that IVippsOrderProcessor, IVippsPollingService and IVippsOrderS
 
 Must be implemented in your project.
 
-The package automatically appends the generated order id as a query string to the specified URL. The quicksilver example implementation can be found [here](demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs)
+The package automatically appends the generated order id as a query string to the specified URL. The quicksilver example implementation can be found [here](../demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs)
 
 `ProcessAuthorizationAsync` method on `IVippsPaymentService` will return the created purchase order for you if the callback from Vipps was successfull. If not, it will ensure all the correct information is on the payment and shipment objects and then create the purchase order.
 **No validation against tempering with the cart line items is done within the package**
@@ -96,6 +97,12 @@ The ProcessAuthorizationResponse also contains a possible error message as well 
  - EXCEPTION
  - OTHER
 
+## Order validation
+
+No order validation is included in this package to protect from f.ex. cart
+tempering. It is **highly** recommended that you implement your own order validation.
+Override the `CreatePurchaseOrder` method in the `DefaultVippsOrderProcessor` class.
+
 ## Polling
 
 The package includes polling the Vipps API to ensure that the payment is handled, even if user closes the browser tab before redirect and a callback from Vipps is not received.
@@ -103,12 +110,6 @@ The package includes polling the Vipps API to ensure that the payment is handled
  - Polling is active for up to ten minutes
  - If a payment has a status that we can act upon polling stops.
  - Set polling interval by adding `Vipps:PollingInterval`  app setting in web config (in milliseconds). Default is 2000 ms.
-
-### Order validation
-
-No order validation is included in this package to protect from f.ex. cart
-tempering. It is **highly** recommended that you implement your own order validation.
-Override the `CreatePurchaseOrder` method in the `DefaultVippsOrderProcessor` class.
 
 ### Initialize polling
 ```

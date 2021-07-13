@@ -1,8 +1,9 @@
 #FAQ
 
+* [I'm having issues with one payment creating two orders](#im-having-issues-with-one-payment-creating-two-orders)
 * [How do I add Vipps as an external payment method in Klarna](#how-do-i-add-vipps-as-an-external-payment-method-in-klarna)
 
-#### I'm having issues with one payment creating two orders
+### I'm having issues with one payment creating two orders
 First of all, make sure that IVippsPollingService, IVippsOrderProcessor and IVippsOrderSynchronizer are all registered as singletons.
 
 In a load balanced environment this might be a slightly more complex issue. Out of the box the package works only with Azure(and therefore DXC) load balanced environments.
@@ -20,7 +21,7 @@ Well with the prerequisite that your sticky session is handled by a cookie with 
 
 And you should be good to go.
 
-#### How do I add Vipps as an external payment method in Klarna
+### How do I add Vipps as an external payment method in Klarna
 This is quite easy. Think of this as an hybrid between Vipps as a payment method in checkout and Vipps Express
 
 - Create an action in an mvc controller that takes f.ex. orderGroupId as a paramater (or customerId, marketId and cartName)

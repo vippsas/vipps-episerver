@@ -11,8 +11,8 @@ Vipps payments and Vipps Express Checkout for Episerver Commerce.
 ## Documentation
 
 * [Install and configure](docs/configure.md)
-* [Express payments](docs/express.md)
-* [Demo site](docs/demosite.md)
+* [Express checkout](docs/express_checkout.md)
+* [Demo site](docs/demo_site.md)
 * [Checklist](docs/checklist.md)
 * [FAQ](docs/faq.md)
 

@@ -1,4 +1,4 @@
-# Express payments
+# Express Checkout
 
 - [Get started](#get-started)
 - [Callbacks](#callbacks)
