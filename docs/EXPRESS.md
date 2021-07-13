@@ -1,49 +1,14 @@
 # Express payments
 
-## Express payments workflow (Product page)
+- [Get started](#get-started)
+- [Callbacks](#callbacks)
+- [Express workflows](#express-workflows)
 
-- User clicks "Vipps Hurtigkasse" button on product page
-- A cart with a different cart name then your default cart name is created and product is added to cart (to persist customers original cart)
-- A flag with "VippsPaymentType" is saved on cart
-- Initiate call to the Vipps API
-- User gets redirected to the Vipps landing page and enters their phone number (if using a phone the Vipps app will be automatically opened instead)
-- User opens the app
-- A call to the shipping details endpoint is made and the available shipping methods and prices are returned
-- User chooses shipping method and confirms the payment
-- A callback is made to the callback endpoint and the cart is populated with the users information and a PurchaseOrder is created
-- User gets redirected to fallback controller
+## Get started
 
-## Express payments workflow (Cart page/review)
+This section assumes you have already installed and configured the Vipps payment method as described [here](configure.md)
 
-- User clicks "Vipps Hurtigkasse" button on product page
-- A flag with "VippsPaymentType" is saved on cart
-- Initiate call to the Vipps API
-- User gets redirected to the Vipps landing page and enters their phone number (if using a phone the Vipps app will be automatically opened instead)
-- User opens the app
-- A call to the shipping details endpoint is made and the available shipping methods and prices are returned
-- User chooses shipping method and confirms the payment
-- A callback is made to the callback endpoint and the cart is populated with the users information and a PurchaseOrder is created
-- User gets redirected to fallback controller
-
-## Express payments workflow (Wish list page/review)
-
-- User clicks "Vipps Hurtigkasse" button on product page
-- The customers WishList cart is loaded
-- A cart with a different cart name then your default cart name is created and all products from wishlist are added (to persist customers original/wishlist cart)
-- A flag with "VippsPaymentType" is saved on cart
-- Initiate call to the Vipps API
-- User gets redirected to the Vipps landing page and enters their phone number (if using a phone the Vipps app will be automatically opened instead)
-- User opens the app
-- A call to the shipping details endpoint is made and the available shipping methods and prices are returned
-- User chooses shipping method and confirms the payment
-- A callback is made to the callback endpoint and the cart is populated with the users information and a PurchaseOrder is created
-- User gets redirected to fallback controller
-
-## Callbacks
-
-The code being run on all callbacks is in `DefaultVippsResponseFactory`, if you need to customize any of this behaviour, just create a new class that inherits from `DefaultVippsResponseFactory`, override the relevant methods and register it in your initialization module as your implementation of `IVippsResponseFactory`.
-
-## Express controller
+### Express controller
 
 An API controller for initializing an express checkout is included in the package. This controller contains basic add to cart functionality for express checkout on product pages, but if you want to use your own cart workflow you will need to create your own controller for this.
 
@@ -59,9 +24,11 @@ The controller has three methods:
   - ErrorMessage
   - RedirectUrl
 
- For the simplest possible frontend implementation of this using jQuery and AJAX. See [VippsExpress.js](demo/Sources/EPiServer.Reference.Commerce.Site/Scripts/js/VippsExpress.js) and [Product/Index](../demo/Sources/EPiServer.Reference.Commerce.Site/Views/Product/Index.cshtml)
+### Frontend
 
-## Implement your own Express Checkout (Api) Controller
+For the simplest possible frontend implementation of this using jQuery and AJAX. See [VippsExpress.js](../demo/Sources/EPiServer.Reference.Commerce.Site/Scripts/js/VippsExpress.js) and [Product/Index](../demo/Sources/EPiServer.Reference.Commerce.Site/Views/Product/Index.cshtml)
+
+### Implement your own Express Checkout (Api) Controller
 
 If you need to implement your own version of the Express Checkout Controller, which in a majority of cases would be the recommended route, there are a few things that are important to keep in mind:
 
@@ -79,3 +46,55 @@ It's assumed that a cart only has one Vipps payment associated with it.
 PaymentHelper will help you create and add a Vipps payment to the cart. It has two helpful methods:
  - `PaymentHelper.GetVippsPaymentMethodDto();` will get the `PaymentMethodDto` for Vipps
  - `PaymentHelper.CreateVippsPayent(ICart, Money, PaymentMethodDto);` will return a Vipps `IPayment` you will be able to add to your cart.
+ 
+ Example of the default VippsExpressContoller is found [here](../src/Vipps/Controllers/VippsExpressController.cs)
+
+## Callbacks
+
+The code being run on all callbacks is in `DefaultVippsResponseFactory`. 
+If you have any needs to set properties on shipment, f.ex. setting a drop point or customize any other behaviour on express callbacks this is the place to do it.
+Just create a new class that inherits from `DefaultVippsResponseFactory`, override the relevant methods and register it in your initialization module as your implementation of `IVippsResponseFactory`.
+
+## Express workflows
+
+There's slightly different workflows depending on where you implement Vipps Express. Here's an overview of the prefered way the different implementations could work.
+
+### Product page flow
+
+- User clicks "Vipps Hurtigkasse" button on product page
+- A cart with a different cart name then your default cart name is created and product is added to cart (to persist customers original cart)
+- A flag with "VippsPaymentType" is saved on cart
+- Initiate call to the Vipps API
+- User gets redirected to the Vipps landing page and enters their phone number (if using a phone the Vipps app will be automatically opened instead)
+- User opens the app
+- A call to the shipping details endpoint is made and the available shipping methods and prices are returned
+- User chooses shipping method and confirms the payment
+- A callback is made to the callback endpoint and the cart is populated with the users information and a PurchaseOrder is created
+- User gets redirected to fallback controller
+
+### Cart page flow
+
+- User clicks "Vipps Hurtigkasse" button on product page
+- A flag with "VippsPaymentType" is saved on cart
+- Initiate call to the Vipps API
+- User gets redirected to the Vipps landing page and enters their phone number (if using a phone the Vipps app will be automatically opened instead)
+- User opens the app
+- A call to the shipping details endpoint is made and the available shipping methods and prices are returned
+- User chooses shipping method and confirms the payment
+- A callback is made to the callback endpoint and the cart is populated with the users information and a PurchaseOrder is created
+- User gets redirected to fallback controller
+
+### Wish list page flow
+
+- User clicks "Vipps Hurtigkasse" button on product page
+- The customers WishList cart is loaded
+- A cart with a different cart name then your default cart name is created and all products from wishlist are added (to persist customers original/wishlist cart)
+- A flag with "VippsPaymentType" is saved on cart
+- Initiate call to the Vipps API
+- User gets redirected to the Vipps landing page and enters their phone number (if using a phone the Vipps app will be automatically opened instead)
+- User opens the app
+- A call to the shipping details endpoint is made and the available shipping methods and prices are returned
+- User chooses shipping method and confirms the payment
+- A callback is made to the callback endpoint and the cart is populated with the users information and a PurchaseOrder is created
+- User gets redirected to fallback controller
+

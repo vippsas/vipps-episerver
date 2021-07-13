@@ -1,10 +1,21 @@
-# Configuration
+# Install and configure
+
+- [Installation](#installation)
+- [Local development environment](#local-development-environment)
+- [Configure Commerce Manager](#configure-commerce-manager)
+- [Initialization](#initialization)
+- [Fallback controller](#fallback-controller)
+- [Polling](#polling)
 
 ## Installation
 
 ## Configure Commerce Manager
 
 Login into Commerce Manager and open **Administration -> Order System -> Payments**. Add new payment.
+
+## Local development environment
+
+In order to use / work on this package locally you'll need a tool called [ngrok](https://www.ngrok.com). This tool can forward a generated ngrok URL to a localhost URL. Both Vipps regular payments as well as express payments are dependant on callbacks from Vipps.
 
 ### Overview tab
 
@@ -29,7 +40,7 @@ Login into Commerce Manager and open **Administration -> Order System -> Payment
  - **Subscription Key** - Can be obtained through [portal.vipps.no](https://portal.vipps.no)
  - **Serial number** - Your merchant Serial number, can be obtained through [portal.vipps.no](https://portal.vipps.no)
  - **Api Url** - Vipps API URL (test or prod)
- - **Site Base Url** - The URL for your site (used to generate callback URLs)
+ - **Site Base Url** - The URL for your site (used to generate callback URLs, ngrok generated url if running local dev env)
  - **Fallback Url** - URL to your fallback controller
 
 ![Payment method paramaters](docs/screenshots/payment-parameters.png "Payment method settings")
@@ -53,7 +64,7 @@ It is important that IVippsOrderProcessor, IVippsPollingService and IVippsOrderS
 
 Must be implemented in your project.
 
-The package automatically appends the generated order id as a query string to the specified URL. The quicksilver example implementation can be found [here](../demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs)
+The package automatically appends the generated order id as a query string to the specified URL. The quicksilver example implementation can be found [here](demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs)
 
 `ProcessAuthorizationAsync` method on `IVippsPaymentService` will return the created purchase order for you if the callback from Vipps was successfull. If not, it will ensure all the correct information is on the payment and shipment objects and then create the purchase order.
 **No validation against tempering with the cart line items is done within the package**
@@ -98,6 +109,7 @@ The package includes polling the Vipps API to ensure that the payment is handled
 No order validation is included in this package to protect from f.ex. cart
 tempering. It is **highly** recommended that you implement your own order validation.
 Override the `CreatePurchaseOrder` method in the `DefaultVippsOrderProcessor` class.
+
 ### Initialize polling
 ```
 [InitializableModule]
@@ -143,4 +155,3 @@ public override async Task < ProcessOrderResponse > CreatePurchaseOrder(ICart ca
 	}
 }
 ```
-
