@@ -3,7 +3,7 @@
 There are some checks you should do before going live, to make sure that a payment can be created in all possible scenarios
 
  - [ ] FallbackController
-  - Set Vipps:PollingInterval in app settings to a high ms count (f.ex. 600000, so polling runs every 10 minutes)
+  - Comment out your [polling initialization](configure.md#polling)
   - Set Site Base Url in Commerce Manager to something that isn't correct
   - Make sure your Fallback Url is correct in Commerce Manager
   - Go through the order flow and comfirm an order has been created
