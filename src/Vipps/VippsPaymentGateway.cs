@@ -31,19 +31,19 @@ namespace Vipps
             switch (payment.TransactionType)
             {
                 case nameof(TransactionType.Authorization):
-                    return VippsPaymentsService.InitiateAsync(orderGroup, payment).GetAwaiter().GetResult();
+                    return VippsPaymentsService.Initiate(orderGroup, payment);
 
                 case nameof(TransactionType.Capture):
-                    return VippsPaymentsService.CaptureAsync(orderGroup, payment).GetAwaiter().GetResult();
+                    return VippsPaymentsService.Capture(orderGroup, payment);
 
                 case nameof(TransactionType.Sale):
-                    return VippsPaymentsService.InitiateAsync(orderGroup, payment).GetAwaiter().GetResult();
+                    return VippsPaymentsService.Initiate(orderGroup, payment);
 
                 case nameof(TransactionType.Void):
-                    return VippsPaymentsService.CancelAsync(orderGroup, payment).GetAwaiter().GetResult();
+                    return VippsPaymentsService.Cancel(orderGroup, payment);
 
                 case nameof(TransactionType.Credit):
-                    return VippsPaymentsService.RefundAsync(orderGroup, payment).GetAwaiter().GetResult();
+                    return VippsPaymentsService.Refund(orderGroup, payment);
 
                 default:
                     throw new NotImplementedException();

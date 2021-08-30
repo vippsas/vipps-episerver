@@ -4,9 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using EPiServer.Commerce.Order;
 using EPiServer.Logging;
-using EPiServer.Scheduler;
 using EPiServer.ServiceLocation;
-using Vipps.Helpers;
+using Vipps.Extensions;
 using Vipps.Models;
 using Vipps.Services;
 
@@ -48,7 +47,7 @@ namespace Vipps.Polling
             };
 
             _pollingEntityContext.PollingEntities.Add(vippsPollingEntity);
-            _pollingEntityContext.SaveChanges();
+            _pollingEntityContext.SaveChangesDatabaseWins();
             _start = true;
         }
 
@@ -111,7 +110,7 @@ namespace Vipps.Polling
                     _pollingEntityContext.PollingEntities.Remove(entityToRemove);
                 }
 
-                _pollingEntityContext.SaveChanges();
+                _pollingEntityContext.SaveChangesDatabaseWins();
                 _running = false;
             }
         }

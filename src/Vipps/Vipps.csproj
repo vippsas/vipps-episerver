@@ -16,6 +16,7 @@
     </NuGetPackageImportStamp>
     <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile />
+    <RepositoryUrl>URL</RepositoryUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -255,6 +256,7 @@
     <Compile Include="Extensions\OrderGroupExtensions.cs" />
     <Compile Include="Extensions\PaymentMethodDtoExtensions.cs" />
     <Compile Include="Extensions\PaymentMethodExtensions.cs" />
+    <Compile Include="Extensions\PollingEntityDbContextExtensions.cs" />
     <Compile Include="Handlers\OrderCancelledEvents.cs" />
     <Compile Include="Helpers\AddressHelper.cs" />
     <Compile Include="Helpers\ExpressPaymentOrderDetailsHelper.cs" />
