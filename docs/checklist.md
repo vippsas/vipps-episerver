@@ -21,7 +21,6 @@ There are some checks you should do before going live, to make sure that a payme
   
   
   - [ ] Polling
-  - Set Vipps:PollingInterval in app settings to what you're need is or remove the app setting (Default value 2000ms)
   - Set Fallback Url and Site Base Url in Commerce Manager to something that isn't correct
   - Go through the order flow and comfirm an order has been created
   
