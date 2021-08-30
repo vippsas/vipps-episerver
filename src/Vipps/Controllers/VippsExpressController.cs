@@ -95,7 +95,7 @@ namespace Vipps.Controllers
         private IHttpActionResult Finalize(ICart cart)
         {
             cart.ApplyDiscounts();
-            var total = _orderGroupCalculator.GetTotal(cart);
+            var total = _orderGroupCalculator.GetSubTotal(cart);
             var vippsPaymentMethodDto = PaymentHelper.GetVippsPaymentMethodDto().PaymentMethod.FirstOrDefault();
 
             if (vippsPaymentMethodDto == null)

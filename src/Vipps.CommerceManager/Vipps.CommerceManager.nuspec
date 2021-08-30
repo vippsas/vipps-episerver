@@ -10,8 +10,10 @@
     <description>$description$</description>
     <copyright>$copyright$</copyright>
     <tags>EPiServer Commerce</tags>
+    <repository type="git" url="URL" branch="BRANCH_NAME" commit="COMMIT" />
     <dependencies>
       <dependency id="EPiServer.Commerce.Core" version="[13.0, 14)" />
+      <dependency id="Vipps" version="$version$" />
     </dependencies>
   </metadata>
 </package>

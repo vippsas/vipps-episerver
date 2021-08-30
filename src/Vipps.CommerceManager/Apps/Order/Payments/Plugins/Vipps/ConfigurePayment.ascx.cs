@@ -102,7 +102,8 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps
                 ApiUrl = txtApiUrl.Text,
                 SiteBaseUrl = txtSiteBaseUrl.Text,
                 FallbackUrl = txtFallbackUrl.Text,
-                TransactionMessage = txtTransactionMessage.Text
+                TransactionMessage = txtTransactionMessage.Text,
+                MarketId = marketDropDownList.SelectedValue
             };
 
             var serialized = JsonConvert.SerializeObject(configuration);

@@ -28,8 +28,8 @@ services:
     image: microsoft/mssql-server-windows-developer:1709
     environment:
      - ACCEPT_EULA=Y
-     - sa_password=Vipps19Epi
-     - attach_dbs=[{'dbName':'vipps-cms','dbFiles':['C:\\data\\vipps-cms.mdf','C:\\data\\vipps-cms.ldf']},{'dbName':'vipps-commerce','dbFiles':['C:\\data\\vipps-commerce.mdf','C:\\data\\vipps-commerce.ldf']}]
+     - sa_password=
+     - attach_dbs=[{'dbName':'vipps-cms','dbFiles':['C:\\data\\vipps-cms.mdf','C:\\data\\vipps-cms_log.ldf']},{'dbName':'vipps-commerce','dbFiles':['C:\\data\\vipps-commerce.mdf','C:\\data\\vipps-commerce_log.ldf']}]
     volumes:
       - ./Sources/EPiServer.Reference.Commerce.Site/App_Data/:C:/data/
     networks:

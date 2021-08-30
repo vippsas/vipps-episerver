@@ -1,6 +1,7 @@
 ﻿using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using Mediachase.Commerce.Catalog;
+using Mediachase.MetaDataPlus.Configurator;
 
 namespace Vipps.Initialization
 {
@@ -13,8 +14,8 @@ namespace Vipps.Initialization
             var mdContext = CatalogContext.MetaDataContext;
             
             // Purchase order meta fields
-            JoinField(mdContext, GetOrCreateMetaField(mdContext, VippsConstants.VippsOrderIdField), VippsConstants.PurchaseOrderClass);
-            JoinField(mdContext, GetOrCreateMetaField(mdContext, VippsConstants.VippsOrderIdField), VippsConstants.CartClass);
+            JoinField(mdContext, GetOrCreateMetaField(mdContext, VippsConstants.VippsOrderIdField, MetaDataType.VarChar), VippsConstants.PurchaseOrderClass);
+            JoinField(mdContext, GetOrCreateMetaField(mdContext, VippsConstants.VippsOrderIdField, MetaDataType.VarChar), VippsConstants.CartClass);
             JoinField(mdContext, GetOrCreateMetaField(mdContext, VippsConstants.VippsPaymentTypeField), VippsConstants.PurchaseOrderClass);
             JoinField(mdContext, GetOrCreateMetaField(mdContext, VippsConstants.VippsPaymentTypeField), VippsConstants.CartClass);
         }

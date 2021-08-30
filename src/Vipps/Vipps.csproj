@@ -16,6 +16,7 @@
     </NuGetPackageImportStamp>
     <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile />
+    <RepositoryUrl>URL</RepositoryUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -255,6 +256,7 @@
     <Compile Include="Extensions\OrderGroupExtensions.cs" />
     <Compile Include="Extensions\PaymentMethodDtoExtensions.cs" />
     <Compile Include="Extensions\PaymentMethodExtensions.cs" />
+    <Compile Include="Extensions\PollingEntityDbContextExtensions.cs" />
     <Compile Include="Handlers\OrderCancelledEvents.cs" />
     <Compile Include="Helpers\AddressHelper.cs" />
     <Compile Include="Helpers\ExpressPaymentOrderDetailsHelper.cs" />
@@ -268,6 +270,15 @@
     <Compile Include="Initialization\OrderInitialization.cs" />
     <Compile Include="Initialization\PollingInitialization.cs" />
     <Compile Include="IVippsConfigurationLoader.cs" />
+    <Compile Include="Migrations\202003291016189_InitialCreate.cs" />
+    <Compile Include="Migrations\202003291016189_InitialCreate.Designer.cs">
+      <DependentUpon>202003291016189_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202004021302320_InstanceIdAdded.cs" />
+    <Compile Include="Migrations\202004021302320_InstanceIdAdded.Designer.cs">
+      <DependentUpon>202004021302320_InstanceIdAdded.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ExpressCheckoutResponse.cs" />
     <Compile Include="Models\IVippsPaymentDetails.cs" />
     <Compile Include="Models\IVippsUserDetails.cs" />
@@ -328,12 +339,19 @@
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202003291016189_InitialCreate.resx">
+      <DependentUpon>202003291016189_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202004021302320_InstanceIdAdded.resx">
+      <DependentUpon>202004021302320_InstanceIdAdded.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.8.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.8.2\build\Microsoft.Net.Compilers.props'))" />
     <Error Condition="!Exists('..\..\packages\Refit.4.0.1\build\net45\refit.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Refit.4.0.1\build\net45\refit.targets'))" />
   </Target>
   <Import Project="..\..\packages\Refit.4.0.1\build\net45\refit.targets" Condition="Exists('..\..\packages\Refit.4.0.1\build\net45\refit.targets')" />

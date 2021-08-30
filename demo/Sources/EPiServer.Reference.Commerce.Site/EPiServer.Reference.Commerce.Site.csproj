@@ -567,6 +567,7 @@
     <Compile Include="Infrastructure\Facades\UrlAuthorizationFacade.cs" />
     <Compile Include="Features\Shared\Extensions\HtmlHelperExtensions.cs" />
     <Compile Include="Infrastructure\OrderEventListener.cs" />
+    <Compile Include="Infrastructure\VippsPollingInitialization.cs" />
     <Compile Include="Infrastructure\SiteImport\CreateOrdersStep.cs" />
     <Compile Include="Infrastructure\SiteImport\Templates.cs" />
     <Compile Include="Infrastructure\SiteImport\ImportSiteContentStep.cs" />

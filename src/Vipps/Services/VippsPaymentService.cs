@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Threading.Tasks;
 using EPiServer.Commerce.Order;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
-using Mediachase.Commerce;
 using Mediachase.Commerce.Orders;
-using Mediachase.Commerce.Orders.Managers;
 using Refit;
 using Vipps.Extensions;
 using Vipps.Helpers;
@@ -29,13 +26,13 @@ namespace Vipps.Services
 
         public VippsPaymentService(
             IOrderRepository orderRepository,
-            VippsServiceApiFactory vippsServiceApiFactory, 
+            VippsServiceApiFactory vippsServiceApiFactory,
             IVippsRequestFactory requestFactory,
             IVippsOrderProcessor vippsOrderCreator,
             IVippsService vippsService,
             IVippsPollingService vippsPollingService,
             IVippsConfigurationLoader configurationLoader)
-            {
+        {
             _orderRepository = orderRepository;
             _vippsServiceApiFactory = vippsServiceApiFactory;
             _requestFactory = requestFactory;
@@ -48,7 +45,9 @@ namespace Vipps.Services
 
         #region public
 
-        public virtual async Task<PaymentProcessingResult> InitiateAsync(IOrderGroup orderGroup, IPayment payment)
+        public virtual PaymentProcessingResult Initiate(
+            IOrderGroup orderGroup,
+            IPayment payment)
         {
             var orderId = OrderNumberHelper.GenerateOrderNumber();
             orderGroup.Properties[VippsConstants.VippsOrderIdField] = orderId;
@@ -62,20 +61,15 @@ namespace Vipps.Services
             try
             {
                 var initiatePaymentRequest =
-                    _requestFactory.CreateInitiatePaymentRequest(payment, orderGroup, configuration, orderId, orderGroup.CustomerId, orderGroup.MarketId.Value);
+                    _requestFactory.CreateInitiatePaymentRequest(payment, orderGroup, configuration, orderId,
+                        orderGroup.CustomerId, orderGroup.MarketId.Value);
 
-                var response = await serviceApi.Initiate(initiatePaymentRequest).ConfigureAwait(false);
+                var response = serviceApi.Initiate(initiatePaymentRequest).GetAwaiter().GetResult();
 
                 OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
                     $"Vipps payment initiated. Vipps reference: {initiatePaymentRequest.Transaction.OrderId}");
 
-                _vippsPollingService.Start(new VippsPollingEntity
-                {
-                    OrderId = orderId,
-                    CartName = orderGroup.Name,
-                    ContactId = orderGroup.CustomerId,
-                    MarketId = orderGroup.MarketId.Value
-                });
+                _vippsPollingService.Start(orderId, orderGroup);
 
                 return PaymentProcessingResult.CreateSuccessfulResult("", response.Url);
             }
@@ -84,58 +78,72 @@ namespace Vipps.Services
             {
                 var errorMessage = GetErrorMessage(apiException);
                 _logger.Log(Level.Error, $"Vipps initiate failed: {errorMessage}");
-                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps payment initiation failed. Error message: {errorMessage}, {apiException}");
+                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                    $"Vipps payment initiation failed. Error message: {errorMessage}, {apiException}");
                 return PaymentProcessingResult.CreateUnsuccessfulResult(errorMessage);
             }
 
             catch (Exception ex)
             {
                 _logger.Log(Level.Error, $"{ex.Message}, {ex.StackTrace}");
-                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps payment initiation failed. Error message: {ex.Message}");
+                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                    $"Vipps payment initiation failed. Error message: {ex.Message}");
                 return PaymentProcessingResult.CreateUnsuccessfulResult(ex.Message);
             }
         }
 
-        public virtual async Task<PaymentProcessingResult> CaptureAsync(IOrderGroup orderGroup, IPayment payment)
+        public virtual PaymentProcessingResult Capture(
+            IOrderGroup orderGroup,
+            IPayment payment)
         {
             var configuration = _configurationLoader.GetConfiguration(orderGroup.MarketId);
 
             try
             {
                 var orderId = payment.TransactionID;
+                var idempotencyKey = GetIdempotencyKey(orderGroup, payment, orderId);
                 var serviceApi = _vippsServiceApiFactory.Create(configuration);
 
                 var capturePaymentRequest =
                     _requestFactory.CreateUpdatePaymentRequest(payment, configuration);
-                var response = await serviceApi.Capture(orderId, capturePaymentRequest).ConfigureAwait(false);
+
+                var response = serviceApi.Capture(orderId, capturePaymentRequest, idempotencyKey).GetAwaiter().GetResult();
 
                 if (response.TransactionInfo.Status == VippsUpdatePaymentResponseStatus.Captured.ToString())
                 {
-                    OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"{payment.Amount} kr captured on vipps order {orderId}");
-                    return PaymentProcessingResult.CreateSuccessfulResult($"{payment.Amount} kr captured on vipps order {orderId}");
+                    OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                        $"{payment.Amount} kr captured on vipps order {orderId}");
+                    return PaymentProcessingResult.CreateSuccessfulResult(
+                        $"{payment.Amount} kr captured on vipps order {orderId}");
                 }
 
-                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps capture payment failed. Order status: {response.TransactionInfo.Status}");
-                return PaymentProcessingResult.CreateUnsuccessfulResult($"Vipps capture payment failed. Order status: {response.TransactionInfo.Status}");
+                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                    $"Vipps capture payment failed. Order status: {response.TransactionInfo.Status}");
+                return PaymentProcessingResult.CreateUnsuccessfulResult(
+                    $"Vipps capture payment failed. Order status: {response.TransactionInfo.Status}");
             }
 
             catch (ApiException apiException)
             {
                 var errorMessage = GetErrorMessage(apiException);
                 _logger.Log(Level.Error, $"Vipps Capture failed: {errorMessage}");
-                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps capture payment failed. Error message: {errorMessage}, {apiException}");
+                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                    $"Vipps capture payment failed. Error message: {errorMessage}, {apiException}");
                 return PaymentProcessingResult.CreateUnsuccessfulResult(errorMessage);
             }
 
             catch (Exception ex)
             {
                 _logger.Log(Level.Error, $"{ex.Message}, {ex.StackTrace}");
-                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps capture payment failed. Error message: {ex.Message}");
+                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                    $"Vipps capture payment failed. Error message: {ex.Message}");
                 return PaymentProcessingResult.CreateUnsuccessfulResult(ex.Message);
             }
         }
 
-        public virtual async Task<PaymentProcessingResult> RefundAsync(IOrderGroup orderGroup, IPayment payment)
+        public virtual PaymentProcessingResult Refund(
+            IOrderGroup orderGroup,
+            IPayment payment)
         {
             var configuration = _configurationLoader.GetConfiguration(orderGroup.MarketId);
 
@@ -147,35 +155,46 @@ namespace Vipps.Services
                 var refundPaymentRequest =
                     _requestFactory.CreateUpdatePaymentRequest(payment, configuration);
 
-                var response = await serviceApi.Refund(orderId, refundPaymentRequest).ConfigureAwait(false);
-
-                if (response.TransactionSummary.RefundedAmount == payment.Amount.FormatAmountToVipps())
+                var response = serviceApi.Refund(orderId, refundPaymentRequest).GetAwaiter().GetResult();
+                
+                var creditTotal = orderGroup.GetFirstForm().Payments.Where(x => x.TransactionType == "Credit")
+                    .Sum(x => x.Amount).FormatAmountToVipps();
+                
+                if (response.TransactionSummary.RefundedAmount == creditTotal)
                 {
-                    OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"{payment.Amount} kr refunded on vipps order {orderId}");
-                    return PaymentProcessingResult.CreateSuccessfulResult($"{payment.Amount} kr captured on refunded order {orderId}");
+                    OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                        $"{payment.Amount} kr refunded on vipps order {orderId}");
+                    return PaymentProcessingResult.CreateSuccessfulResult(
+                        $"{payment.Amount} kr captured on refunded order {orderId}");
                 }
 
-                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps refund payment failed. Order status: {response.TransactionInfo.Status}");
-                return PaymentProcessingResult.CreateUnsuccessfulResult($"Vipps refund payment failed. Order status: {response.TransactionInfo.Status}");
+                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                    $"Vipps refund payment failed. Order status: {response.TransactionInfo.Status}");
+                return PaymentProcessingResult.CreateUnsuccessfulResult(
+                    $"Vipps refund payment failed. Order status: {response.TransactionInfo.Status}");
             }
 
             catch (ApiException apiException)
             {
                 var errorMessage = GetErrorMessage(apiException);
                 _logger.Log(Level.Error, $"Vipps Refund failed: {errorMessage}");
-                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps refund payment failed. Error message: {errorMessage}, {apiException}");
+                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                    $"Vipps refund payment failed. Error message: {errorMessage}, {apiException}");
                 return PaymentProcessingResult.CreateUnsuccessfulResult(errorMessage);
             }
 
             catch (Exception ex)
             {
                 _logger.Log(Level.Error, $"{ex.Message}, {ex.StackTrace}");
-                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps refund payment failed. Error message: {ex.Message}");
+                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                    $"Vipps refund payment failed. Error message: {ex.Message}");
                 return PaymentProcessingResult.CreateUnsuccessfulResult(ex.Message);
             }
         }
 
-        public virtual async Task<PaymentProcessingResult> CancelAsync(IOrderGroup orderGroup, IPayment payment)
+        public virtual PaymentProcessingResult Cancel(
+            IOrderGroup orderGroup,
+            IPayment payment)
         {
             var configuration = _configurationLoader.GetConfiguration(orderGroup.MarketId);
 
@@ -187,35 +206,45 @@ namespace Vipps.Services
                 var cancelPaymentRequest =
                     _requestFactory.CreateUpdatePaymentRequest(payment, configuration);
 
-                var response = await serviceApi.Cancel(orderId, cancelPaymentRequest).ConfigureAwait(false);
-
+                var response = serviceApi.Cancel(payment.TransactionID, cancelPaymentRequest).GetAwaiter().GetResult();
                 if (response.TransactionInfo.Status == VippsUpdatePaymentResponseStatus.Cancelled.ToString())
                 {
-                    OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Payment cancelled for vipps order {orderId}");
-                    return PaymentProcessingResult.CreateSuccessfulResult($"{payment.Amount} Payment cancelled vipps order {orderId}");
+                    OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                        $"Payment cancelled for vipps order {orderId}");
+                    return PaymentProcessingResult.CreateSuccessfulResult(
+                        $"{payment.Amount} Payment cancelled vipps order {orderId}");
                 }
 
-                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps cancel payment failed. Order status: {response.TransactionInfo.Status}");
-                return PaymentProcessingResult.CreateUnsuccessfulResult($"Vipps cancel payment failed. Order status: {response.TransactionInfo.Status}");
+                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                    $"Vipps cancel payment failed. Order status: {response.TransactionInfo.Status}");
+                return PaymentProcessingResult.CreateUnsuccessfulResult(
+                    $"Vipps cancel payment failed. Order status: {response.TransactionInfo.Status}");
             }
 
             catch (ApiException apiException)
             {
-                var errorMessage = GetErrorMessage(apiException); 
+                var errorMessage = GetErrorMessage(apiException);
                 _logger.Log(Level.Error, $"Vipps cancel failed: {errorMessage}");
-                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps cancel payment failed. Error message: {errorMessage}, {apiException}");
+                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                    $"Vipps cancel payment failed. Error message: {errorMessage}, {apiException}");
                 return PaymentProcessingResult.CreateUnsuccessfulResult(errorMessage);
             }
 
             catch (Exception ex)
             {
+                payment.Status = PaymentStatus.Failed.ToString();
                 _logger.Log(Level.Error, $"{ex.Message}, {ex.StackTrace}");
-                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType, $"Vipps cancel payment failed. Error message: {ex.Message}");
+                OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
+                    $"Vipps cancel payment failed. Error message: {ex.Message}");
                 return PaymentProcessingResult.CreateUnsuccessfulResult(ex.Message);
             }
         }
 
-        public virtual async Task<ProcessAuthorizationResponse> ProcessAuthorizationAsync(Guid contactId, string marketId, string cartName, string orderId)
+        public virtual ProcessAuthorizationResponse ProcessAuthorization(
+            Guid contactId,
+            string marketId,
+            string cartName,
+            string orderId)
         {
             var purchaseOrder = _vippsService.GetPurchaseOrderByOrderId(orderId);
             if (purchaseOrder != null)
@@ -230,8 +259,9 @@ namespace Vipps.Services
             var cart = _vippsService.GetCartByContactId(contactId, marketId, cartName);
             var paymentType = GetVippsPaymentType(cart);
 
-            var orderDetails = await _vippsService.GetOrderDetailsAsync(orderId, marketId);
-            var result = await _vippsOrderCreator.ProcessOrderDetails(orderDetails, orderId, contactId, marketId, cartName);
+            var orderDetails = _vippsService.GetOrderDetailsAsync(orderId, marketId).GetAwaiter().GetResult();
+            var result = _vippsOrderCreator.ProcessOrderDetails(orderDetails, orderId, contactId, marketId, cartName)
+                .GetAwaiter().GetResult();
             if (result.PurchaseOrder != null)
             {
                 return new ProcessAuthorizationResponse(result)
@@ -251,7 +281,9 @@ namespace Vipps.Services
 
         #region private
 
-        private static IPayment GetPayment(ICart cart, string orderId)
+        private static IPayment GetPayment(
+            ICart cart, 
+            string orderId)
         {
             if (cart.Forms == null || cart.Forms.Count == 0 || cart.GetFirstForm().Payments == null ||
                 cart.GetFirstForm().Payments.Count == 0)
@@ -262,7 +294,9 @@ namespace Vipps.Services
             var payments = cart.GetFirstForm().Payments;
 
             return payments.Any()
-                ? payments.FirstOrDefault(x => x.TransactionType.Equals(TransactionType.Authorization.ToString()) && x.IsVippsPayment() && x.TransactionID == orderId)
+                ? payments.FirstOrDefault(x =>
+                    x.TransactionType.Equals(TransactionType.Authorization.ToString()) && x.IsVippsPayment() &&
+                    x.TransactionID == orderId)
                 : null;
         }
 
@@ -280,6 +314,11 @@ namespace Vipps.Services
             }
 
             return VippsPaymentType.CHECKOUT;
+        }
+
+        private string GetIdempotencyKey(IOrderGroup orderGroup, IPayment payment, string orderId)
+        {
+            return $"{orderId}-{string.Format("{0:0.00}", orderGroup.GetFirstForm().CapturedPaymentTotal)}-{string.Format("{0:0.00}", payment.Amount)}";
         }
 
         #endregion

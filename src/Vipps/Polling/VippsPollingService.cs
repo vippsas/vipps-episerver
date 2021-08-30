@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EPiServer.Commerce.Order;
 using EPiServer.Logging;
-using EPiServer.Scheduler;
 using EPiServer.ServiceLocation;
+using Vipps.Extensions;
 using Vipps.Models;
 using Vipps.Services;
 
@@ -16,49 +17,67 @@ namespace Vipps.Polling
         private readonly PollingEntityDbContext _pollingEntityContext;
         private readonly IVippsService _vippsService;
         private readonly IVippsOrderProcessor _vippsOrderCreator;
-        private readonly SchedulerOptions _schedulerOptions;
+        private readonly IVippsOrderSynchronizer _vippsOrderSynchronizer;
         private readonly ILogger _logger = LogManager.GetLogger(typeof(VippsPollingService));
         private bool _start = true;
         private bool _running;
 
-        public VippsPollingService(PollingEntityDbContext pollingEntityContext,
+        public VippsPollingService(
+            PollingEntityDbContext pollingEntityContext,
             IVippsService vippsService,
-            IVippsOrderProcessor vippsOrderCreator, 
-            SchedulerOptions schedulerOptions)
+            IVippsOrderProcessor vippsOrderCreator,
+            IVippsOrderSynchronizer vippsOrderSynchronizer)
         {
             _pollingEntityContext = pollingEntityContext;
             _vippsService = vippsService;
             _vippsOrderCreator = vippsOrderCreator;
-            _schedulerOptions = schedulerOptions;
+            _vippsOrderSynchronizer = vippsOrderSynchronizer;
         }
 
-        public void Start(VippsPollingEntity vippsPollingEntity)
+        public void Start(string orderId, IOrderGroup orderGroup)
         {
+            var vippsPollingEntity = new VippsPollingEntity
+            {
+                CartName = orderGroup.Name,
+                ContactId = orderGroup.CustomerId,
+                Created = orderGroup.Created,
+                MarketId = orderGroup.MarketId.Value,
+                OrderId = orderId,
+                InstanceId = _vippsOrderSynchronizer.GetInstanceId()
+            };
+
             _pollingEntityContext.PollingEntities.Add(vippsPollingEntity);
-            _pollingEntityContext.SaveChanges();
+            _pollingEntityContext.SaveChangesDatabaseWins();
             _start = true;
+        }
+
+        public void Stop()
+        {
+            _start = false;
         }
 
         public async Task Run()
         {
-            if (_start && !_running && _schedulerOptions.Enabled)
+            if (_start && !_running)
             {
                 _running = true;
                 var pollingEntitiesToRemove = new List<VippsPollingEntity>();
 
                 try
                 {
-                    var pollingEntities = _pollingEntityContext.PollingEntities.ToList();
+                    var instanceId = _vippsOrderSynchronizer.GetInstanceId();
+                    var pollingEntities = _pollingEntityContext.PollingEntities.ToList().Where(x => x.InstanceId == instanceId);
 
                     if (!pollingEntities.Any())
                     {
-                        _start = false;
+                        Stop();
                     }
 
                     foreach (var entity in pollingEntities)
                     {
                         if (entity.Created.AddMinutes(-10) < DateTime.Now)
                         {
+                            _logger.Debug($"Running polling for entity with orderId: {entity.OrderId} and instanceId: {entity.InstanceId} on instance {instanceId}");
                             var orderDetails = await _vippsService.GetOrderDetailsAsync(entity.OrderId, entity.MarketId);
                             if (orderDetails == null)
                             {
@@ -91,7 +110,7 @@ namespace Vipps.Polling
                     _pollingEntityContext.PollingEntities.Remove(entityToRemove);
                 }
 
-                _pollingEntityContext.SaveChanges();
+                _pollingEntityContext.SaveChangesDatabaseWins();
                 _running = false;
             }
         }

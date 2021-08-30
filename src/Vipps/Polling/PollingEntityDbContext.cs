@@ -6,7 +6,7 @@ namespace Vipps.Polling
     {
         public PollingEntityDbContext() : base("EcfSqlConnection")
         {
-            
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<PollingEntityDbContext, Vipps.Migrations.Configuration>());
         }
 
         public DbSet<VippsPollingEntity> PollingEntities { get; set; }
