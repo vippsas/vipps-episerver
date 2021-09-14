@@ -19,7 +19,7 @@ namespace EPiServer.Reference.Commerce.Site.Features.Checkout.Controllers
     public class PaymentFallbackController : Controller
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly IVippsPaymentService _vippsPaymentService;
+        private readonly IVippsAsyncPaymentService _vippsPaymentService;
         private readonly ReferenceConverter _referenceConverter;
         private readonly IContentLoader _contentLoader;
         private readonly CustomerContextFacade _customerContext;
@@ -28,24 +28,23 @@ namespace EPiServer.Reference.Commerce.Site.Features.Checkout.Controllers
 
         public PaymentFallbackController(ICartService cartService,
             IOrderRepository orderRepository,
-            IVippsPaymentService vippsPaymentService,
             ReferenceConverter referenceConverter,
             IContentLoader contentLoader,
             CustomerContextFacade customerContext,
-            IVippsService vippsService)
+            IVippsService vippsService, IVippsAsyncPaymentService vippsPaymentService)
         {
             _cartService = cartService;
             _orderRepository = orderRepository;
-            _vippsPaymentService = vippsPaymentService;
             _referenceConverter = referenceConverter;
             _contentLoader = contentLoader;
             _customerContext = customerContext;
             _vippsService = vippsService;
+            _vippsPaymentService = vippsPaymentService;
         }
 
         public async Task<RedirectResult> Index(string orderId, string contactId, string marketId, string cartName)
         {
-            var result = await _vippsPaymentService.ProcessAuthorizationAsync(Guid.Parse(contactId), marketId, cartName, orderId);
+            var result = await _vippsPaymentService.ProcessAuthorization(Guid.Parse(contactId), marketId, cartName, orderId);
 
             //If ProcessAuthorization fails user needs to be redirected back to checkout or product page
             if (!result.Processed)
