@@ -64,7 +64,7 @@ namespace Vipps.Services
                     _requestFactory.CreateInitiatePaymentRequest(payment, orderGroup, configuration, orderId,
                         orderGroup.CustomerId, orderGroup.MarketId.Value);
 
-                var response = serviceApi.Initiate(initiatePaymentRequest).GetAwaiter().GetResult();
+                var response = AsyncHelper.RunSync(() => serviceApi.Initiate(initiatePaymentRequest));
 
                 OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
                     $"Vipps payment initiated. Vipps reference: {initiatePaymentRequest.Transaction.OrderId}");
@@ -107,7 +107,7 @@ namespace Vipps.Services
                 var capturePaymentRequest =
                     _requestFactory.CreateUpdatePaymentRequest(payment, configuration);
 
-                var response = serviceApi.Capture(orderId, capturePaymentRequest, idempotencyKey).GetAwaiter().GetResult();
+                var response = AsyncHelper.RunSync(() => serviceApi.Capture(orderId, capturePaymentRequest, idempotencyKey));
 
                 if (response.TransactionInfo.Status == VippsUpdatePaymentResponseStatus.Captured.ToString())
                 {
@@ -155,7 +155,7 @@ namespace Vipps.Services
                 var refundPaymentRequest =
                     _requestFactory.CreateUpdatePaymentRequest(payment, configuration);
 
-                var response = serviceApi.Refund(orderId, refundPaymentRequest).GetAwaiter().GetResult();
+                var response = AsyncHelper.RunSync(() => serviceApi.Refund(orderId, refundPaymentRequest));
                 
                 var creditTotal = orderGroup.GetFirstForm().Payments.Where(x => x.TransactionType == "Credit")
                     .Sum(x => x.Amount).FormatAmountToVipps();
@@ -206,7 +206,7 @@ namespace Vipps.Services
                 var cancelPaymentRequest =
                     _requestFactory.CreateUpdatePaymentRequest(payment, configuration);
 
-                var response = serviceApi.Cancel(payment.TransactionID, cancelPaymentRequest).GetAwaiter().GetResult();
+                var response = AsyncHelper.RunSync(() => serviceApi.Cancel(payment.TransactionID, cancelPaymentRequest));
                 if (response.TransactionInfo.Status == VippsUpdatePaymentResponseStatus.Cancelled.ToString())
                 {
                     OrderNoteHelper.AddNoteAndSaveChanges(orderGroup, payment, payment.TransactionType,
@@ -257,11 +257,10 @@ namespace Vipps.Services
             }
 
             var cart = _vippsService.GetCartByContactId(contactId, marketId, cartName);
-            var paymentType = GetVippsPaymentType(cart);
+            var paymentType = PaymentTypeHelper.GetVippsPaymentType(cart);
 
-            var orderDetails = _vippsService.GetOrderDetailsAsync(orderId, marketId).GetAwaiter().GetResult();
-            var result = _vippsOrderCreator.ProcessOrderDetails(orderDetails, orderId, contactId, marketId, cartName)
-                .GetAwaiter().GetResult();
+            var orderDetails = AsyncHelper.RunSync(() => _vippsService.GetOrderDetailsAsync(orderId, marketId));
+            var result = AsyncHelper.RunSync(() => _vippsOrderCreator.ProcessOrderDetails(orderDetails, orderId, contactId, marketId, cartName));
             if (result.PurchaseOrder != null)
             {
                 return new ProcessAuthorizationResponse(result)
@@ -298,22 +297,6 @@ namespace Vipps.Services
                     x.TransactionType.Equals(TransactionType.Authorization.ToString()) && x.IsVippsPayment() &&
                     x.TransactionID == orderId)
                 : null;
-        }
-
-        private VippsPaymentType GetVippsPaymentType(ICart cart)
-        {
-            if (cart == null)
-            {
-                return VippsPaymentType.UNKNOWN;
-            }
-
-            if (Enum.TryParse<VippsPaymentType>(cart?.Properties[VippsConstants.VippsPaymentTypeField]?.ToString(),
-                out var paymentType))
-            {
-                return paymentType;
-            }
-
-            return VippsPaymentType.CHECKOUT;
         }
 
         private string GetIdempotencyKey(IOrderGroup orderGroup, IPayment payment, string orderId)

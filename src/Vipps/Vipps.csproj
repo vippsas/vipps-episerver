@@ -259,10 +259,12 @@
     <Compile Include="Extensions\PollingEntityDbContextExtensions.cs" />
     <Compile Include="Handlers\OrderCancelledEvents.cs" />
     <Compile Include="Helpers\AddressHelper.cs" />
+    <Compile Include="Helpers\AsyncHelper.cs" />
     <Compile Include="Helpers\ExpressPaymentOrderDetailsHelper.cs" />
     <Compile Include="Helpers\OrderNoteHelper.cs" />
     <Compile Include="Helpers\OrderNumberHelper.cs" />
     <Compile Include="Helpers\PaymentHelper.cs" />
+    <Compile Include="Helpers\PaymentTypeHelper.cs" />
     <Compile Include="Helpers\PhoneNumberHelper.cs" />
     <Compile Include="Helpers\AmountHelper.cs" />
     <Compile Include="Initialization\MetadataInitialization.cs" />
@@ -313,9 +315,11 @@
     <Compile Include="Services\DefaultVippsOrderSynchronizer.cs" />
     <Compile Include="Services\DefaultVippsRequestFactory.cs" />
     <Compile Include="Services\DefaultVippsResponseFactory.cs" />
+    <Compile Include="Services\IVippsAsyncPaymentService.cs" />
     <Compile Include="Services\IVippsOrderProcessor.cs" />
     <Compile Include="Services\IVippsOrderSynchronizer.cs" />
     <Compile Include="Polling\IVippsPollingService.cs" />
+    <Compile Include="Services\VippsAsyncPaymentService.cs" />
     <Compile Include="Services\VippsPaymentService.cs" />
     <Compile Include="Services\IVippsRequestFactory.cs" />
     <Compile Include="Services\IVippsPaymentService.cs" />
