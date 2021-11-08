@@ -68,12 +68,7 @@ namespace Vipps.Services
             return Task.FromResult(result);
         }
 
-        public virtual Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
-        {
-            return Task.FromResult(ConvertToPurchaseOrder(cart));
-        }
-
-        protected virtual ProcessOrderResponse ConvertToPurchaseOrder(ICart cart)
+        public virtual ProcessOrderResponse CreatePurchaseOrder(ICart cart)
         {
             ProcessOrderResponse result;
 
@@ -295,7 +290,7 @@ namespace Vipps.Services
             payment.Status = PaymentStatus.Processed.ToString();
             AddNote(cart, payment, orderId, paymentDetails);
 
-            var loadOrCreatePurchaseOrderResponse = ConvertToPurchaseOrder(cart);
+            var loadOrCreatePurchaseOrderResponse = CreatePurchaseOrder(cart);
             if (loadOrCreatePurchaseOrderResponse.PurchaseOrder != null)
             {
                 return loadOrCreatePurchaseOrderResponse;

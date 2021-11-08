@@ -8,7 +8,7 @@ namespace Vipps.Services
 {
     public interface IVippsOrderProcessor
     {
-        Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart);
+        ProcessOrderResponse CreatePurchaseOrder(ICart cart);
 
         Task<ProcessOrderResponse> FetchAndProcessOrderDetails(string orderId, Guid contactId, string marketId, string cartName);
 

@@ -21,6 +21,9 @@ Dependency reference to `IVippsService` has been removed from the constructor.
 This will result in a build error that can be resolved by removing the `IVippsService` parameter from any inheriting classes.
 
 ### IVippsOrderProcessor
+`Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)` has a new signature `ProcessOrderResponse CreatePurchaseOrder(ICart cart)` and is executed synchronously. 
+If you previously used async method calls inside of an overriding class, please use `AsyncHelper.RunSync(() => ...)` included in the Vipps package to execute.
+
 Due to some performance concerns we have made some adjustments to the default implementation of IVippsOrderProcessor which should resonate in any inheriting implementation.
 
 `[Obsolete] Task<ProcessOrderResponse> ProcessOrderDetails(DetailsResponse detailsResponse, string orderId, Guid contactId, string marketId, string cartName)`
