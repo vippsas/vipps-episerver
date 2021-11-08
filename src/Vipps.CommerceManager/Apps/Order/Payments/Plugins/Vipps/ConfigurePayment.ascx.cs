@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using EPiServer.ServiceLocation;
-using Mediachase.BusinessFoundation.Core;
 using Mediachase.Commerce;
 using Mediachase.Commerce.Markets;
 using Mediachase.Commerce.Orders.Dto;
@@ -32,9 +31,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps
             BindConfigurationData(configuration);
             BindLegacyConfiguration();
             BindMarketData(markets);
-        }
-
-       
+        }       
 
         private void BindMarketData(PaymentMethodDto.MarketPaymentMethodsRow[] markets)
         {
@@ -59,6 +56,7 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps
             txtClientSecret.Text = configuration.ClientSecret;
             txtSubscriptionKey.Text = configuration.SubscriptionKey;
             txtSerialNumber.Text = configuration.MerchantSerialNumber;
+            txtSystemName.Text = configuration.SystemName;
             txtApiUrl.Text = configuration.ApiUrl;
             txtSiteBaseUrl.Text = configuration.SiteBaseUrl;
             txtFallbackUrl.Text = configuration.FallbackUrl;
@@ -93,12 +91,13 @@ namespace Vipps.CommerceManager.Apps.Order.Payments.Plugins.Vipps
             
             var currentMarket = marketDropDownList.SelectedValue;
 
-            var configuration = new VippsConfiguration()
+            var configuration = new VippsConfiguration
             {
                 ClientId = txtClientId.Text,
                 ClientSecret = txtClientSecret.Text,
                 SubscriptionKey = txtSubscriptionKey.Text,
                 MerchantSerialNumber = txtSerialNumber.Text,
+                SystemName = txtSystemName.Text,
                 ApiUrl = txtApiUrl.Text,
                 SiteBaseUrl = txtSiteBaseUrl.Text,
                 FallbackUrl = txtFallbackUrl.Text,

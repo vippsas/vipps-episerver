@@ -20,7 +20,6 @@ namespace Vipps.Services
         private readonly VippsServiceApiFactory _vippsServiceApiFactory;
         private readonly IVippsRequestFactory _requestFactory;
         private readonly IVippsOrderProcessor _vippsOrderCreator;
-        private readonly IVippsService _vippsService;
         private readonly IVippsPollingService _vippsPollingService;
         private readonly IVippsConfigurationLoader _configurationLoader;
 
@@ -29,7 +28,6 @@ namespace Vipps.Services
             VippsServiceApiFactory vippsServiceApiFactory,
             IVippsRequestFactory requestFactory,
             IVippsOrderProcessor vippsOrderCreator,
-            IVippsService vippsService,
             IVippsPollingService vippsPollingService,
             IVippsConfigurationLoader configurationLoader)
         {
@@ -37,10 +35,8 @@ namespace Vipps.Services
             _vippsServiceApiFactory = vippsServiceApiFactory;
             _requestFactory = requestFactory;
             _vippsOrderCreator = vippsOrderCreator;
-            _vippsService = vippsService;
             _vippsPollingService = vippsPollingService;
             _configurationLoader = configurationLoader;
-            ;
         }
 
         #region public
@@ -246,21 +242,7 @@ namespace Vipps.Services
             string cartName,
             string orderId)
         {
-            var purchaseOrder = _vippsService.GetPurchaseOrderByOrderId(orderId);
-            if (purchaseOrder != null)
-            {
-                return new ProcessAuthorizationResponse
-                {
-                    PurchaseOrder = purchaseOrder,
-                    Processed = true
-                };
-            }
-
-            var cart = _vippsService.GetCartByContactId(contactId, marketId, cartName);
-            var paymentType = PaymentTypeHelper.GetVippsPaymentType(cart);
-
-            var orderDetails = AsyncHelper.RunSync(() => _vippsService.GetOrderDetailsAsync(orderId, marketId));
-            var result = AsyncHelper.RunSync(() => _vippsOrderCreator.ProcessOrderDetails(orderDetails, orderId, contactId, marketId, cartName));
+            var result = AsyncHelper.RunSync(() => _vippsOrderCreator.FetchAndProcessOrderDetails(orderId, contactId, marketId, cartName));
             if (result.PurchaseOrder != null)
             {
                 return new ProcessAuthorizationResponse(result)
@@ -271,7 +253,6 @@ namespace Vipps.Services
 
             return new ProcessAuthorizationResponse(result)
             {
-                PaymentType = paymentType,
                 Processed = false
             };
         }

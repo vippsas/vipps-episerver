@@ -14,6 +14,7 @@
         // PurchaseOrder/Cart meta fields
         public const string VippsOrderIdField = "VippsOrderId";
         public const string VippsPaymentTypeField = "VippsPaymentType";
+        public const string VippsIsProcessingOrderField = "VippsIsProcessingOrder";
 
         // Payment meta fields
         public const string ClientId = "VippsClientId";
@@ -31,6 +32,5 @@
         
         // Payment method property fields
         public const string VippsSerializedMarketOptions = "VippsSerializedMarketOptions";
-
     }
 }
