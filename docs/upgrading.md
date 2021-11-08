@@ -4,7 +4,7 @@
 For performance reasons the VippsOrderId field has been migrated to use a different data type. Existing Vipps installs will undergo a migration that happens during site startup.
 Make sure to _backup the commerce database_ before upgrading if any error or data loss should happen. Actions taken during this migration are logged on `DEBUG` level.
 
-## Affected tables
+### Affected tables
 The following tables are affected by the database migration, please ensure beforehand that no tables have constraints (like indexes) that prohibit altering the column `VippsOrderId`.
 
 ```
