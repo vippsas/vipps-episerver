@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EPiServer.Commerce.Order;
 using EPiServer.Logging;
@@ -31,84 +32,213 @@ namespace Vipps.Services
             _synchronizer = synchronizer;
         }
 
-        public async Task<ProcessOrderResponse> ProcessOrderDetails(DetailsResponse detailsResponse, string orderId, Guid contactId, string marketId, string cartName)
+        public async Task<ProcessOrderResponse> FetchAndProcessOrderDetails(string orderId, Guid contactId, string marketId, string cartName)
         {
-            var lastTransaction = detailsResponse.TransactionLogHistory.OrderByDescending(x => x.TimeStamp).FirstOrDefault();
-            return await ProcessOrder(detailsResponse, lastTransaction, orderId, contactId, marketId, cartName);
+            if (_logger.IsDebugEnabled())
+                _logger.Debug($"Starting processing of vipps order: {orderId}.");
 
+            var lockInfo = GetLock(orderId, contactId, marketId, cartName);
+            var result = await ProcessLockedAsync(lockInfo, () => CheckDependenciesThenProcessPaymentAsync(orderId, contactId, marketId, cartName));
+
+            if (_logger.IsDebugEnabled())
+                _logger.Debug($"Ending processing of vipps order: {orderId}.");
+
+            return result;
         }
 
-        private async Task<ProcessOrderResponse> ProcessOrder(IVippsUserDetails vippsUserDetails, IVippsPaymentDetails paymentDetails, string orderId, Guid contactId, string marketId, string cartName)
+        // Note: This overload is obsolete
+        public Task<ProcessOrderResponse> ProcessOrderDetails(DetailsResponse detailsResponse, string orderId, Guid contactId, string marketId, string cartName)
         {
-            var readLock = _synchronizer.Get(orderId);
+            var lastTransaction = GetLastTransaction(detailsResponse);
+            var result = ProcessOrder(detailsResponse, lastTransaction, orderId, contactId, marketId, cartName);
+
+            return Task.FromResult(result);
+        }
+
+        public ProcessOrderResponse ProcessOrderDetails(DetailsResponse detailsResponse, string orderId, ICart cart)
+        {
+            var lastTransaction = GetLastTransaction(detailsResponse);
+            return ProcessOrder(detailsResponse, lastTransaction, orderId, cart);
+        }
+
+        public Task<ProcessOrderResponse> ProcessPaymentCallback(PaymentCallback paymentCallback, string orderId, string contactId, string marketId,
+            string cartName)
+        {
+            var result = ProcessOrder(paymentCallback, paymentCallback.TransactionInfo, orderId, Guid.Parse(contactId), marketId, cartName);
+            return Task.FromResult(result);
+        }
+
+        public virtual Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
+        {
+            return Task.FromResult(ConvertToPurchaseOrder(cart));
+        }
+
+        protected virtual ProcessOrderResponse ConvertToPurchaseOrder(ICart cart)
+        {
+            ProcessOrderResponse result;
 
             try
             {
-                await readLock.WaitAsync();
-                var purchaseOrder = _vippsService.GetPurchaseOrderByOrderId(orderId);
-                if (purchaseOrder != null)
+                if (_logger.IsInformationEnabled())
+                    _logger.Information($"Creating PurchaseOrder for orderId {cart.Properties[VippsConstants.VippsOrderIdField]}");
+
+                //Add your order validation here
+                var orderReference = _orderRepository.SaveAsPurchaseOrder(cart);
+                var purchaseOrder = _orderRepository.Load<IPurchaseOrder>(orderReference.OrderGroupId);
+
+                _orderRepository.Delete(cart.OrderLink);
+
+                result = new ProcessOrderResponse
                 {
-                    return new ProcessOrderResponse
-                    {
-                        PurchaseOrder = purchaseOrder
-                    };
-                }
+                    PurchaseOrder = purchaseOrder
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message);
 
-                var cart = _vippsService.GetCartByContactId(contactId, marketId, cartName);
-                if (cart == null)
+                result = new ProcessOrderResponse
                 {
-                    _logger.Warning($"No cart found for vipps order id {orderId}");
-                    return new ProcessOrderResponse
-                    {
-                        ProcessResponseErrorType = ProcessResponseErrorType.NOCARTFOUND,
-                        ErrorMessage = $"No cart found for vipps order id {orderId}"
-                    };
-                }
+                    ErrorMessage = ex.Message,
+                    ProcessResponseErrorType = ProcessResponseErrorType.EXCEPTION,
+                };
+            }
 
-                var payment = cart.GetFirstForm().Payments.FirstOrDefault(x =>
-                    x.IsVippsPayment() && x.TransactionID == orderId &&
-                    x.TransactionType.Equals(TransactionType.Authorization.ToString()));
+            return result;
+        }
 
+        private ProcessOrderResponse ProcessOrder(IVippsUserDetails vippsUserDetails, IVippsPaymentDetails paymentDetails, string orderId, Guid contactId, string marketId, string cartName)
+        {
+            var lockInfo = GetLock(orderId, contactId, marketId, cartName);
+            return ProcessLocked(lockInfo, () => CheckDependenciesThenProcessPayment(vippsUserDetails, paymentDetails, orderId, contactId, marketId, cartName));
+        }
 
-                if (TransactionSuccess(paymentDetails))
-                {
-                    return await HandleSuccess(cart, payment, paymentDetails, vippsUserDetails, orderId);
-                }
+        private ProcessOrderResponse ProcessOrder(IVippsUserDetails vippsUserDetails, IVippsPaymentDetails paymentDetails, string orderId, ICart cart)
+        {
+            var lockInfo = GetLock(orderId, cart);
+            return ProcessLocked(lockInfo, () => ProcessPayment(vippsUserDetails, paymentDetails, orderId, cart));
+        }
 
-                if (TransactionCancelled(paymentDetails))
-                {
-                    return HandleCancelled(cart, payment, paymentDetails, orderId);
-                }
-
-                if (TransactionFailed(paymentDetails))
-                {
-                    return HandleFailed(cart, payment, paymentDetails, orderId);
-                }
-
+        private async Task<ProcessOrderResponse> CheckDependenciesThenProcessPaymentAsync(string orderId, Guid contactId, string marketId, string cartName)
+        {
+            var purchaseOrder = _vippsService.GetPurchaseOrderByOrderId(orderId);
+            if (purchaseOrder != null)
+            {
                 return new ProcessOrderResponse
+                {
+                    PurchaseOrder = purchaseOrder
+                };
+            }
+
+            var cart = _vippsService.GetCartByContactId(contactId, marketId, cartName);
+            var errorResponse = ValidateCart(orderId, cart);
+            if (errorResponse != null)
+                return errorResponse;
+
+            cart.SetOrderProcessing(true);
+
+            _orderRepository.Save(cart);
+
+            var detailsResponse = await _vippsService.GetOrderDetailsAsync(orderId, marketId);
+            var lastTransaction = GetLastTransaction(detailsResponse);
+
+            return ProcessPayment(detailsResponse, lastTransaction, orderId, cart);
+        }
+
+        private ProcessOrderResponse CheckDependenciesThenProcessPayment(IVippsUserDetails vippsUserDetails, IVippsPaymentDetails paymentDetails, string orderId, Guid contactId, string marketId, string cartName)
+        {
+            var purchaseOrder = _vippsService.GetPurchaseOrderByOrderId(orderId);
+            if (purchaseOrder != null)
+            {
+                return new ProcessOrderResponse
+                {
+                    PurchaseOrder = purchaseOrder
+                };
+            }
+
+            return GetCartThenProcessPayment(vippsUserDetails, paymentDetails, orderId, contactId, marketId, cartName);
+        }
+
+        private ProcessOrderResponse GetCartThenProcessPayment(IVippsUserDetails vippsUserDetails, IVippsPaymentDetails paymentDetails, string orderId, Guid contactId, string marketId, string cartName)
+        {
+            var cart = _vippsService.GetCartByContactId(contactId, marketId, cartName);
+            var errorResponse = ValidateCart(orderId, cart);
+            if (errorResponse != null)
+                return errorResponse;
+
+            cart.SetOrderProcessing(true);
+
+            _orderRepository.Save(cart);
+
+            return ProcessPayment(vippsUserDetails, paymentDetails, orderId, cart);
+        }
+
+        private ProcessOrderResponse ProcessPayment(IVippsUserDetails vippsUserDetails, IVippsPaymentDetails paymentDetails, string orderId, ICart cart)
+        {
+            ProcessOrderResponse response;
+
+            var payment = cart.GetFirstPayment(x =>
+                       x.IsVippsPayment() &&
+                       x.TransactionID == orderId &&
+                       x.TransactionType.Equals(nameof(TransactionType.Authorization)));
+
+            if (TransactionSuccess(paymentDetails))
+            {
+                response = HandleSuccess(cart, payment, paymentDetails, vippsUserDetails, orderId);
+            }
+            else if (TransactionCancelled(paymentDetails))
+            {
+                response = HandleCancelled(cart, payment, paymentDetails, orderId);
+            }
+            else if (TransactionFailed(paymentDetails))
+            {
+                response = HandleFailed(cart, payment, paymentDetails, orderId);
+            }
+            else
+            {
+                response = new ProcessOrderResponse
                 {
                     ProcessResponseErrorType = ProcessResponseErrorType.OTHER,
                     ErrorMessage = $"No action taken on order id: {orderId}."
                 };
             }
 
-            catch (Exception ex)
+            return EnsurePaymentType(response, cart);
+        }
+
+        private IVippsPaymentDetails GetLastTransaction(DetailsResponse detailsResponse)
+        {
+            return detailsResponse.TransactionLogHistory.OrderByDescending(x => x.TimeStamp)
+                                                        .FirstOrDefault();
+        }
+
+        private ProcessOrderResponse ValidateCart(string orderId, ICart cart)
+        {
+            if (cart == null)
             {
-                _logger.Error(ex.Message, ex);
+                _logger.Warning($"No cart found for vipps order id {orderId}");
+
                 return new ProcessOrderResponse
                 {
-                    ErrorMessage = ex.Message,
-                    ProcessResponseErrorType = ProcessResponseErrorType.EXCEPTION
+                    PaymentType = VippsPaymentType.UNKNOWN,
+                    ProcessResponseErrorType = ProcessResponseErrorType.NOCARTFOUND,
+                    ErrorMessage = $"No cart found for vipps order id {orderId}"
                 };
             }
 
-            finally
+            if (cart.IsProcessingOrder())
             {
-                readLock.Release();
+                _logger.Warning($"Vipps order {orderId} is already processing");
 
-                if (readLock.CurrentCount > 0)
-                    _synchronizer.Remove(orderId);
+                return new ProcessOrderResponse
+                {
+                    PaymentType = cart.GetVippsPaymentType(),
+                    ProcessResponseErrorType = ProcessResponseErrorType.OTHER,
+                    ErrorMessage = $"Order is already processing"
+                };
             }
+
+            return null;
         }
 
         private ProcessOrderResponse HandleFailed(ICart cart, IPayment payment, IVippsPaymentDetails paymentDetails, string orderId)
@@ -128,7 +258,6 @@ namespace Vipps.Services
             {
                 ProcessResponseErrorType = ProcessResponseErrorType.FAILED
             };
-
         }
 
         private ProcessOrderResponse HandleCancelled(ICart cart, IPayment payment, IVippsPaymentDetails paymentDetails, string orderId)
@@ -148,12 +277,13 @@ namespace Vipps.Services
             };
         }
 
-        private async Task<ProcessOrderResponse> HandleSuccess(ICart cart, IPayment payment, IVippsPaymentDetails paymentDetails, IVippsUserDetails userDetails, string orderId)
+        private ProcessOrderResponse HandleSuccess(ICart cart, IPayment payment, IVippsPaymentDetails paymentDetails, IVippsUserDetails userDetails, string orderId)
         {
             if (payment == null)
             {
                 OrderNoteHelper.AddNoteAndSaveChanges(cart, "Cancel", $"No vipps payment found for vipps order id {orderId}. Canceling payment");
                 PaymentHelper.CancelPayment(cart, paymentDetails.Amount, orderId);
+
                 return new ProcessOrderResponse
                 {
                     ErrorMessage = $"No vipps payment found for vipps order id {orderId}.",
@@ -165,7 +295,7 @@ namespace Vipps.Services
             payment.Status = PaymentStatus.Processed.ToString();
             AddNote(cart, payment, orderId, paymentDetails);
 
-            var loadOrCreatePurchaseOrderResponse = await CreatePurchaseOrder(cart);
+            var loadOrCreatePurchaseOrderResponse = ConvertToPurchaseOrder(cart);
             if (loadOrCreatePurchaseOrderResponse.PurchaseOrder != null)
             {
                 return loadOrCreatePurchaseOrderResponse;
@@ -191,8 +321,6 @@ namespace Vipps.Services
             }
 
             throw new InvalidCastException(nameof(paymentDetails));
-
-            
         }
 
         private bool TransactionCancelled(IVippsPaymentDetails paymentDetails)
@@ -268,43 +396,152 @@ namespace Vipps.Services
             throw new InvalidCastException(nameof(paymentDetails));
         }
 
-        public async Task<ProcessOrderResponse> ProcessPaymentCallback(PaymentCallback paymentCallback, string orderId, string contactId, string marketId,
-            string cartName)
+        private ProcessOrderResponse ProcessLocked(ProcessLockInformation lockInfo, Func<ProcessOrderResponse> method)
         {
-            return await ProcessOrder(paymentCallback, paymentCallback.TransactionInfo, orderId, Guid.Parse(contactId), marketId,
-                cartName);
-        }
+            ProcessOrderResponse response;
 
-        public virtual async Task<ProcessOrderResponse> CreatePurchaseOrder(ICart cart)
-        {
+            var readLock = _synchronizer.Get(lockInfo.OrderId);
+
             try
             {
-                _logger.Information($"Creating PurchaseOrder for orderId {cart.Properties[VippsConstants.VippsOrderIdField]}");
-
-                //Add your order validation here
-                var orderReference = _orderRepository.SaveAsPurchaseOrder(cart);
-                var purchaseOrder = _orderRepository.Load<IPurchaseOrder>(orderReference.OrderGroupId);
-                _orderRepository.Delete(cart.OrderLink);
-                return new ProcessOrderResponse
-                {
-                    PurchaseOrder = purchaseOrder
-                };
+                readLock.Wait();
+                response = method();
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message);
-                return new ProcessOrderResponse
-                {
-                    ErrorMessage = ex.Message,
-                    ProcessResponseErrorType = ProcessResponseErrorType.EXCEPTION
-                };
+                _logger.Error(ex.Message, ex);
+                response = GetErrorResponse(ex);
+            }
+            finally
+            {
+                TryReleaseLock(lockInfo, readLock);
+            }
+
+            return TryEnsureCartNotProcessing(lockInfo, response);
+        }
+
+        private async Task<ProcessOrderResponse> ProcessLockedAsync(ProcessLockInformation lockInfo, Func<Task<ProcessOrderResponse>> method)
+        {
+            ProcessOrderResponse response;
+
+            var readLock = _synchronizer.Get(lockInfo.OrderId);
+
+            try
+            {
+                await readLock.WaitAsync();
+                response = await method();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                response = GetErrorResponse(ex);
+            }
+            finally
+            {
+                TryReleaseLock(lockInfo, readLock);
+            }
+
+            return TryEnsureCartNotProcessing(lockInfo, response);
+        }
+        
+        private ProcessLockInformation GetLock(string orderId, Guid contactId, string marketId, string cartName)
+        {
+            return new ProcessLockInformation(orderId, contactId, marketId, cartName);
+        }
+
+        private ProcessLockInformation GetLock(string orderId, ICart cart)
+        {
+            return new ProcessLockInformation(orderId, cart.OrderLink.OrderGroupId);
+        }
+
+        private bool TryReleaseLock(ProcessLockInformation lockInfo, SemaphoreSlim readLock)
+        {
+            try
+            {
+                readLock.Release();
+
+                if (readLock.CurrentCount > 0)
+                    _synchronizer.Remove(lockInfo.OrderId);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                return false;
             }
         }
 
-        public void EnsureExpressPaymentAndShipping(ICart cart, IPayment payment, IVippsPaymentDetails paymentDetails, IVippsUserDetails userDetails)
+        private ProcessOrderResponse GetErrorResponse(Exception ex)
+        {
+            return new ProcessOrderResponse
+            {
+                ErrorMessage = ex.Message,
+                PaymentType = VippsPaymentType.UNKNOWN,
+                ProcessResponseErrorType = ProcessResponseErrorType.EXCEPTION
+            };
+        }
+
+        private void SetCartNotProcessing(string orderId, ICart cart)
+        {
+            var processing = cart.IsProcessingOrder();
+            if (processing == false)
+                return;
+
+            _logger.Warning($"Resetting processing state of cart for vipps order {orderId}.");
+
+            cart.SetOrderProcessing(false);
+
+            _orderRepository.Save(cart);
+        }
+
+        private ProcessOrderResponse TryEnsureCartNotProcessing(ProcessLockInformation lockInfo, ProcessOrderResponse response)
+        {
+
+            try
+            {
+                EnsureCartNotProcessing(lockInfo, response);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+            }
+
+            return response;
+        }
+
+        private void EnsureCartNotProcessing(ProcessLockInformation lockInfo, ProcessOrderResponse response)
+        {
+            if (response.PurchaseOrder != null) return;
+
+            ICart cart;
+
+            if (lockInfo.OrderGroupId.HasValue)
+            {
+                cart = _orderRepository.Load<ICart>(lockInfo.OrderGroupId.Value);
+            }
+            else
+            {
+                cart = _vippsService.GetCartByContactId(lockInfo.ContactId.Value, lockInfo.MarketId, lockInfo.CartName);
+            }
+
+            SetCartNotProcessing(lockInfo.OrderId, cart);
+        }
+
+        private void EnsureExpressPaymentAndShipping(ICart cart, IPayment payment, IVippsPaymentDetails paymentDetails, IVippsUserDetails userDetails)
         {
             EnsureShipping(cart, userDetails);
             EnsurePayment(payment, cart, paymentDetails, userDetails);
+        }
+
+        private static ProcessOrderResponse EnsurePaymentType(ProcessOrderResponse response, ICart cart)
+        {
+            if (response == null) return response;
+            if (response.PurchaseOrder != null) return response;
+
+            response.PaymentType = cart.GetVippsPaymentType();
+
+            return response;
         }
 
         private static void EnsurePayment(IPayment payment, ICart cart, IVippsPaymentDetails paymentDetails, IVippsUserDetails details)

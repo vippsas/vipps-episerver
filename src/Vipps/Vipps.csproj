@@ -251,6 +251,10 @@
     <Compile Include="AuthenticatedHttpClientHandler.cs" />
     <Compile Include="Controllers\VippsCallbackController.cs" />
     <Compile Include="Controllers\VippsExpressController.cs" />
+    <Compile Include="Data\MetaFieldMigrator.cs" />
+    <Compile Include="Data\ColumnMigrator.cs" />
+    <Compile Include="Data\DbExecutorBase.cs" />
+    <Compile Include="Data\IndexMigrator.cs" />
     <Compile Include="DefaultVippsConfigurationLoader.cs" />
     <Compile Include="Extensions\PaymentExtensions.cs" />
     <Compile Include="Extensions\OrderGroupExtensions.cs" />
@@ -284,6 +288,7 @@
     <Compile Include="Models\ExpressCheckoutResponse.cs" />
     <Compile Include="Models\IVippsPaymentDetails.cs" />
     <Compile Include="Models\IVippsUserDetails.cs" />
+    <Compile Include="Models\ProcessLockInformation.cs" />
     <Compile Include="Models\ProcessOrderResponse.cs" />
     <Compile Include="Models\ProcessResponseErrorType.cs" />
     <Compile Include="Models\VippsPaymentType.cs" />

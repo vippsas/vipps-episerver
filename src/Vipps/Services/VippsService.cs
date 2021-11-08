@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using EPiServer.Commerce.Order;
@@ -7,8 +8,6 @@ using EPiServer.ServiceLocation;
 using Mediachase.Commerce.Orders;
 using Mediachase.Commerce.Orders.Search;
 using Refit;
-using Vipps.Extensions;
-using Vipps.Helpers;
 using Vipps.Models.ResponseModels;
 
 namespace Vipps.Services
@@ -90,25 +89,26 @@ namespace Vipps.Services
 
         public IPurchaseOrder GetPurchaseOrderByOrderId(string orderId)
         {
-            OrderSearchOptions searchOptions = new OrderSearchOptions
+            return GetPurchaseOrder(orderId, false);
+        }
+
+        private IPurchaseOrder GetPurchaseOrder(string orderId, bool cacheResults)
+        {
+            var searchOptions = new OrderSearchOptions
             {
-                CacheResults = false,
+                CacheResults = cacheResults,
                 StartingRecord = 0,
                 RecordsToRetrieve = 1,
-                Classes = new System.Collections.Specialized.StringCollection { "PurchaseOrder" },
+                Classes = new StringCollection { "PurchaseOrder" },
                 Namespace = "Mediachase.Commerce.Orders"
             };
 
-            var parameters = new OrderSearchParameters();
-            parameters.SqlMetaWhereClause = $"META.{VippsConstants.VippsOrderIdField} LIKE '{orderId}'";
-
-            var purchaseOrder = OrderContext.Current.Search<PurchaseOrder>(parameters, searchOptions)?.FirstOrDefault();
-
-            if (purchaseOrder != null)
+            var parameters = new OrderSearchParameters
             {
-                return _orderRepository.Load<IPurchaseOrder>(purchaseOrder.OrderGroupId);
-            }
-            return null;
+                SqlMetaWhereClause = $"META.{VippsConstants.VippsOrderIdField} = '{orderId}'"
+            };
+
+            return OrderContext.Current.Search<PurchaseOrder>(parameters, searchOptions)?.FirstOrDefault();
         }
     }
 }

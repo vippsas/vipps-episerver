@@ -6,14 +6,14 @@ namespace Vipps.Helpers
 {
     public static class PaymentTypeHelper
     {
-        public static VippsPaymentType GetVippsPaymentType(ICart cart)
+        public static VippsPaymentType GetVippsPaymentType(IOrderGroup orderGroup)
         {
-            if (cart == null)
+            if (orderGroup == null)
             {
                 return VippsPaymentType.UNKNOWN;
             }
 
-            if (Enum.TryParse<VippsPaymentType>(cart?.Properties[VippsConstants.VippsPaymentTypeField]?.ToString(),
+            if (Enum.TryParse<VippsPaymentType>(orderGroup?.Properties[VippsConstants.VippsPaymentTypeField]?.ToString(),
                 out var paymentType))
             {
                 return paymentType;

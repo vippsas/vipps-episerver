@@ -36,13 +36,14 @@ In order to use / work on this package locally you'll need a tool called [ngrok]
 
 ### Paramaters
 
- - **Client Id** - Can be obtained through [portal.vipps.no](https://portal.vipps.no)
- - **Client Secret**- Can be obtained through [portal.vipps.no](https://portal.vipps.no)
- - **Subscription Key** - Can be obtained through [portal.vipps.no](https://portal.vipps.no)
- - **Serial number** - Your merchant Serial number, can be obtained through [portal.vipps.no](https://portal.vipps.no)
- - **Api Url** - Vipps API URL (test or prod)
- - **Site Base Url** - The URL for your site (used to generate callback URLs, ngrok generated url if running local dev env)
- - **Fallback Url** - URL to your fallback controller
+ - **Client Id** - Can be obtained through Vipps developer portal
+ - **Client Secret**- Can be obtained through Vipps developer portal
+ - **Subscription Key** - Can be obtained through Vipps developer portal
+ - **System name** - A vendor specific identifier, usually the company name like `acme`, [see here](https://github.com/vippsas/vipps-ecom-api/blob/master/vipps-ecom-api.md#optional-vipps-http-headers)
+ - **Serial number** - Your merchant Serial number, can be obtained through Vipps developer portal
+ - **Api Url** - Vipps api url (test or prod)
+ - **Site Base Url** - The url for your site. (used to generate callback urls)
+ - **Fallback Url** - Url to your fallback controller
 
 ![Payment method paramaters](screenshots/payment-parameters.png "Payment method settings")
 

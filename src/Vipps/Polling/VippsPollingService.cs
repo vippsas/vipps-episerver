@@ -38,9 +38,10 @@ namespace Vipps.Polling
         {
             var vippsPollingEntity = new VippsPollingEntity
             {
+                // orderGroup.Created is in UTC
+                Created = orderGroup.Created,
                 CartName = orderGroup.Name,
                 ContactId = orderGroup.CustomerId,
-                Created = orderGroup.Created,
                 MarketId = orderGroup.MarketId.Value,
                 OrderId = orderId,
                 InstanceId = _vippsOrderSynchronizer.GetInstanceId()
@@ -75,7 +76,9 @@ namespace Vipps.Polling
 
                     foreach (var entity in pollingEntities)
                     {
-                        if (entity.Created.AddMinutes(-10) < DateTime.Now)
+                        // since entity.Created comes from orderGroup.Created which is in UTC
+                        // UTC should be used to check this time
+                        if (entity.Created.AddMinutes(-10) < DateTime.UtcNow)
                         {
                             _logger.Debug($"Running polling for entity with orderId: {entity.OrderId} and instanceId: {entity.InstanceId} on instance {instanceId}");
                             var orderDetails = await _vippsService.GetOrderDetailsAsync(entity.OrderId, entity.MarketId);
@@ -83,16 +86,23 @@ namespace Vipps.Polling
                             {
                                 _logger.Warning($"No order details for vipps order {entity.OrderId}");
                                 pollingEntitiesToRemove.Add(entity);
+                                continue;
                             }
 
-                            var result = await _vippsOrderCreator.ProcessOrderDetails(orderDetails, entity.OrderId, entity.ContactId,
-                                entity.MarketId, entity.CartName);
+                            var cart = _vippsService.GetCartByContactId(entity.OrderId, entity.MarketId, entity.CartName);
+                            if (cart == null)
+                            {
+                                _logger.Warning($"No cart found for vipps order id {entity.OrderId}");
+                                pollingEntitiesToRemove.Add(entity);
+                                continue;
+                            }
+
+                            var result = _vippsOrderCreator.ProcessOrderDetails(orderDetails, entity.OrderId, cart);
                             if (result.PurchaseOrder != null || result.ProcessResponseErrorType != ProcessResponseErrorType.OTHER)
                             {
                                 pollingEntitiesToRemove.Add(entity);
                             }
                         }
-
                         else
                         {
                             _logger.Information($"Vipps payment with order id {entity.OrderId} reached max recount. Stopping polling.");

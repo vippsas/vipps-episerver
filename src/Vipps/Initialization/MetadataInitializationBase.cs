@@ -1,8 +1,6 @@
 ﻿using EPiServer.Logging;
 using Mediachase.MetaDataPlus;
 using Mediachase.MetaDataPlus.Configurator;
-using MetaClass = Mediachase.MetaDataPlus.Configurator.MetaClass;
-using MetaField = Mediachase.MetaDataPlus.Configurator.MetaField;
 
 namespace Vipps.Initialization
 {
@@ -10,16 +8,18 @@ namespace Vipps.Initialization
     {
         protected static readonly ILogger Logger = LogManager.GetLogger(typeof(MetadataInitializationBase));
 
-        protected MetaField GetOrCreateMetaField(MetaDataContext mdContext, string fieldName, MetaDataType metaDataType = MetaDataType.LongString)
+        protected MetaField GetOrCreateMetaField(MetaDataContext mdContext, string fieldName, MetaDataType metaDataType = MetaDataType.LongString, int length = int.MaxValue)
         {
+            var field = MetaField.Load(mdContext, fieldName);
+            if (field != null) return field;
+            
+            return CreateMetaField(mdContext, fieldName, metaDataType, length);
+        }
 
-            var f = MetaField.Load(mdContext, fieldName);
-            if (f == null)
-            {
-                Logger.Debug($"Adding meta field '{fieldName}' for vipps integration.");
-                f = MetaField.Create(mdContext, VippsConstants.OrderNamespace, fieldName, fieldName, string.Empty, metaDataType, int.MaxValue, true, false, false, false);
-            }
-            return f;
+        protected MetaField CreateMetaField(MetaDataContext mdContext, string fieldName, MetaDataType metaDataType = MetaDataType.NVarChar, int length = int.MaxValue)
+        {
+            Logger.Debug($"Adding meta field '{fieldName}' for vipps integration.");
+            return MetaField.Create(mdContext, VippsConstants.OrderNamespace, fieldName, fieldName, string.Empty, metaDataType, length, true, false, false, false);
         }
 
         protected void JoinField(MetaDataContext mdContext, MetaField field, string metaClassName)
