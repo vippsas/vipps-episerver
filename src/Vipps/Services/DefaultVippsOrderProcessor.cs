@@ -32,7 +32,21 @@ namespace Vipps.Services
             _synchronizer = synchronizer;
         }
 
-        public async Task<ProcessOrderResponse> FetchAndProcessOrderDetails(string orderId, Guid contactId, string marketId, string cartName)
+        public ProcessOrderResponse FetchAndProcessOrderDetails(string orderId, Guid contactId, string marketId, string cartName)
+        {
+            if (_logger.IsDebugEnabled())
+                _logger.Debug($"Starting processing of vipps order: {orderId}.");
+
+            var lockInfo = GetLock(orderId, contactId, marketId, cartName);
+            var result = ProcessLocked(lockInfo, () => CheckDependenciesThenProcessPayment(orderId, contactId, marketId, cartName));
+
+            if (_logger.IsDebugEnabled())
+                _logger.Debug($"Ending processing of vipps order: {orderId}.");
+
+            return result;
+        }
+
+        public async Task<ProcessOrderResponse> FetchAndProcessOrderDetailsAsync(string orderId, Guid contactId, string marketId, string cartName)
         {
             if (_logger.IsDebugEnabled())
                 _logger.Debug($"Starting processing of vipps order: {orderId}.");
@@ -114,25 +128,33 @@ namespace Vipps.Services
             return ProcessLocked(lockInfo, () => ProcessPayment(vippsUserDetails, paymentDetails, orderId, cart));
         }
 
-        private async Task<ProcessOrderResponse> CheckDependenciesThenProcessPaymentAsync(string orderId, Guid contactId, string marketId, string cartName)
+        private ProcessOrderResponse CheckDependenciesThenProcessPayment(string orderId, Guid contactId, string marketId, string cartName)
         {
-            var purchaseOrder = _vippsService.GetPurchaseOrderByOrderId(orderId);
-            if (purchaseOrder != null)
-            {
-                return new ProcessOrderResponse
-                {
-                    PurchaseOrder = purchaseOrder
-                };
-            }
-
-            var cart = _vippsService.GetCartByContactId(contactId, marketId, cartName);
-            var errorResponse = ValidateCart(orderId, cart);
+            var errorResponse = EnsureNoPurchaseOrder(orderId);
             if (errorResponse != null)
                 return errorResponse;
 
-            cart.SetOrderProcessing(true);
+            var cart = _vippsService.GetCartByContactId(contactId, marketId, cartName);
+            errorResponse = ValidateCartAndSetProcessing(orderId, cart);
+            if (errorResponse != null)
+                return errorResponse;
 
-            _orderRepository.Save(cart);
+            var detailsResponse = AsyncHelper.RunSync(() => _vippsService.GetOrderDetailsAsync(orderId, marketId));
+            var lastTransaction = GetLastTransaction(detailsResponse);
+
+            return ProcessPayment(detailsResponse, lastTransaction, orderId, cart);
+        }
+
+        private async Task<ProcessOrderResponse> CheckDependenciesThenProcessPaymentAsync(string orderId, Guid contactId, string marketId, string cartName)
+        {
+            var errorResponse = EnsureNoPurchaseOrder(orderId);
+            if (errorResponse != null)
+                return errorResponse;
+
+            var cart = _vippsService.GetCartByContactId(contactId, marketId, cartName);
+            errorResponse = ValidateCartAndSetProcessing(orderId, cart);
+            if (errorResponse != null)
+                return errorResponse;
 
             var detailsResponse = await _vippsService.GetOrderDetailsAsync(orderId, marketId);
             var lastTransaction = GetLastTransaction(detailsResponse);
@@ -142,14 +164,9 @@ namespace Vipps.Services
 
         private ProcessOrderResponse CheckDependenciesThenProcessPayment(IVippsUserDetails vippsUserDetails, IVippsPaymentDetails paymentDetails, string orderId, Guid contactId, string marketId, string cartName)
         {
-            var purchaseOrder = _vippsService.GetPurchaseOrderByOrderId(orderId);
-            if (purchaseOrder != null)
-            {
-                return new ProcessOrderResponse
-                {
-                    PurchaseOrder = purchaseOrder
-                };
-            }
+            var purchaseOrderResponse = EnsureNoPurchaseOrder(orderId);
+            if (purchaseOrderResponse != null)
+                return purchaseOrderResponse;
 
             return GetCartThenProcessPayment(vippsUserDetails, paymentDetails, orderId, contactId, marketId, cartName);
         }
@@ -157,13 +174,9 @@ namespace Vipps.Services
         private ProcessOrderResponse GetCartThenProcessPayment(IVippsUserDetails vippsUserDetails, IVippsPaymentDetails paymentDetails, string orderId, Guid contactId, string marketId, string cartName)
         {
             var cart = _vippsService.GetCartByContactId(contactId, marketId, cartName);
-            var errorResponse = ValidateCart(orderId, cart);
+            var errorResponse = ValidateCartAndSetProcessing(orderId, cart);
             if (errorResponse != null)
                 return errorResponse;
-
-            cart.SetOrderProcessing(true);
-
-            _orderRepository.Save(cart);
 
             return ProcessPayment(vippsUserDetails, paymentDetails, orderId, cart);
         }
@@ -207,6 +220,18 @@ namespace Vipps.Services
                                                         .FirstOrDefault();
         }
 
+        private ProcessOrderResponse ValidateCartAndSetProcessing(string orderId, ICart cart)
+        {
+            var errorResponse = ValidateCart(orderId, cart);
+            if (errorResponse != null)
+                return errorResponse;
+
+            cart.SetOrderProcessing(true);
+
+            _orderRepository.Save(cart);
+
+            return null;
+        }
         private ProcessOrderResponse ValidateCart(string orderId, ICart cart)
         {
             if (cart == null)
@@ -503,6 +528,17 @@ namespace Vipps.Services
             }
 
             return response;
+        }
+
+        private ProcessOrderResponse EnsureNoPurchaseOrder(string orderId)
+        {
+            var purchaseOrder = _vippsService.GetPurchaseOrderByOrderId(orderId);
+            if (purchaseOrder == null) return null;
+
+            return new ProcessOrderResponse
+            {
+                PurchaseOrder = purchaseOrder
+            };
         }
 
         private void EnsureCartNotProcessing(ProcessLockInformation lockInfo, ProcessOrderResponse response)

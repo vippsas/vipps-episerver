@@ -15,7 +15,7 @@ namespace Vipps.Services
         
         public async Task<ProcessAuthorizationResponse> ProcessAuthorization(Guid contactId, string marketId, string cartName, string orderId)
         {
-            var result = await _vippsOrderProcessor.FetchAndProcessOrderDetails(orderId, contactId, marketId, cartName);
+            var result = await _vippsOrderProcessor.FetchAndProcessOrderDetailsAsync(orderId, contactId, marketId, cartName);
             if (result.PurchaseOrder != null)
             {
                 return new ProcessAuthorizationResponse(result)

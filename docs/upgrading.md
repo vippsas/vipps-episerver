@@ -27,10 +27,11 @@ If you previously used async method calls inside of an overriding class, please 
 Due to some performance concerns we have made some adjustments to the default implementation of IVippsOrderProcessor which should resonate in any inheriting implementation.
 
 `[Obsolete] Task<ProcessOrderResponse> ProcessOrderDetails(DetailsResponse detailsResponse, string orderId, Guid contactId, string marketId, string cartName)`
-Is now considered Obsolete and will be removed in the future. Instead two different versions are to take its place.
+Is now considered Obsolete and will be removed in the future. Instead different alternatives are to take its place.
 
-`Task<ProcessOrderResponse> FetchAndProcessOrderDetails(string orderId, Guid contactId, string marketId, string cartName)`
-Encapsulates all loading of `IPurchaseOrder`, `ICart` and `IVippsUserDetails` to have more control over simultaneous execution. This method should be used by callback controllers.
+`Task<ProcessOrderResponse> FetchAndProcessOrderDetailsAsync(string orderId, Guid contactId, string marketId, string cartName)` and
+`ProcessOrderResponse FetchAndProcessOrderDetails(string orderId, Guid contactId, string marketId, string cartName)`
+Encapsulates all loading of `IPurchaseOrder`, `ICart` and `IVippsUserDetails` to have more control over simultaneous execution. These methods should be used by callback controllers.
 
 `Task<ProcessOrderResponse> ProcessOrderDetails(DetailsResponse detailsResponse, string orderId, ICart cart)`
 Reuses an already loaded cart and executes without the need for loading a purchase order. This method is used internally by the polling logic and is not suited for public exposure.

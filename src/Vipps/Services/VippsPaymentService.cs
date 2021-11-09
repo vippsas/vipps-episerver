@@ -242,7 +242,7 @@ namespace Vipps.Services
             string cartName,
             string orderId)
         {
-            var result = AsyncHelper.RunSync(() => _vippsOrderCreator.FetchAndProcessOrderDetails(orderId, contactId, marketId, cartName));
+            var result = _vippsOrderCreator.FetchAndProcessOrderDetails(orderId, contactId, marketId, cartName);
             if (result.PurchaseOrder != null)
             {
                 return new ProcessAuthorizationResponse(result)
