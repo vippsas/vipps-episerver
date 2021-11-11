@@ -10,6 +10,14 @@
 
 ## Installation
 
+Start by installing NuGet packages (use [NuGet](https://nuget.episerver.com/)):
+
+    Install-Package Vipps
+
+For the Commerce Manager site run the following package:
+
+    Install-Package Vipps.CommerceManager
+
 ## Configure Commerce Manager
 
 Login into Commerce Manager and open **Administration -> Order System -> Payments**. Add new payment.
@@ -55,6 +63,7 @@ services.AddTransient<IVippsService, VippsService>();
 services.AddTransient<IVippsPaymentService, VippsPaymentService>();
 services.AddTransient<IVippsRequestFactory, DefaultVippsRequestFactory>();
 services.AddTransient<IVippsResponseFactory, DefaultVippsResponseFactory>();
+services.AddTransient<IVippsAsyncPaymentService, VippsAsyncPaymentService>();
 services.AddSingleton<IVippsOrderSynchronizer, DefaultVippsOrderSynchronizer>();
 services.AddSingleton<IVippsOrderProcessor, DefaultVippsOrderProcessor>();
 services.AddSingleton<IVippsPollingService, VippsPollingService>();
@@ -68,11 +77,11 @@ Must be implemented in your project.
 
 The package automatically appends the generated order id as a query string to the specified URL. The quicksilver example implementation can be found [here](../demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs)
 
-`ProcessAuthorizationAsync` method on `IVippsPaymentService` will return the created purchase order for you if the callback from Vipps was successfull. If not, it will ensure all the correct information is on the payment and shipment objects and then create the purchase order.
+`ProcessAuthorizationAsync` method on `IVippsAsyncPaymentService` will return the created purchase order for you if the callback from Vipps was successfull. If not, it will ensure all the correct information is on the payment and shipment objects and then create the purchase order.
 **No validation against tempering with the cart line items is done within the package**
 
 ```
-var result = await _vippsPaymentService.ProcessAuthorizationAsync(currentContactId, currentMarketId, cartName, orderId);
+var result = await _vippsAsyncPaymentService.ProcessAuthorizationAsync(currentContactId, currentMarketId, cartName, orderId);
 ```
 
 The method returns a `ProcessAuthorizationResponse` which contains an enum called `VippsPaymentType`, this can be set to
