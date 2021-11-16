@@ -35,9 +35,9 @@ namespace Vipps.Initialization
             // Note: See https://vipps.no/developers-documentation/ecom/documentation/#orderid-recommendations
             var idFieldMaxLength = 50;
 
-            if (idField != null && idField.DataType != MetaDataType.NVarChar && idField.Length != idFieldMaxLength)
+            if (idField != null && (idField.DataType != MetaDataType.ShortString || idField.Length != idFieldMaxLength))
             {
-                _metaFieldMigrator.AlterMetaField(VippsConstants.VippsOrderIdField, MetaDataType.NVarChar, idFieldMaxLength);
+                _metaFieldMigrator.AlterMetaField(VippsConstants.VippsOrderIdField, MetaDataType.ShortString, idFieldMaxLength);
 
                 var columnType = $"nvarchar({idFieldMaxLength})";
 
@@ -46,8 +46,8 @@ namespace Vipps.Initialization
             }
             else
             {
-                JoinField(mdContext, GetOrCreateMetaField(mdContext, VippsConstants.VippsOrderIdField, MetaDataType.NVarChar, 50), VippsConstants.PurchaseOrderClass);
-                JoinField(mdContext, GetOrCreateMetaField(mdContext, VippsConstants.VippsOrderIdField, MetaDataType.NVarChar, 50), VippsConstants.CartClass);
+                JoinField(mdContext, GetOrCreateMetaField(mdContext, VippsConstants.VippsOrderIdField, MetaDataType.ShortString, 50), VippsConstants.PurchaseOrderClass);
+                JoinField(mdContext, GetOrCreateMetaField(mdContext, VippsConstants.VippsOrderIdField, MetaDataType.ShortString, 50), VippsConstants.CartClass);
             }
             
             JoinField(mdContext, GetOrCreateMetaField(mdContext, VippsConstants.VippsPaymentTypeField), VippsConstants.PurchaseOrderClass);
