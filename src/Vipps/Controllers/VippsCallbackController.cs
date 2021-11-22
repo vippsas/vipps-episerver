@@ -2,7 +2,6 @@
 using System.Configuration;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 using EPiServer.Logging;
@@ -10,6 +9,8 @@ using Vipps.Services;
 using Vipps.Models.RequestModels;
 using Vipps.Models.ResponseModels;
 using System.Net;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace Vipps.Controllers
 {
@@ -29,7 +30,7 @@ namespace Vipps.Controllers
             _responseFactory = responseFactory;
             _vippsOrderSynchronizer = vippsOrderSynchronizer;
             _cookieName = ConfigurationManager.AppSettings["Vipps:InstanceCookieName"] ?? "ARRAffinity";
-            _client = new HttpClient(new HttpClientHandler {UseCookies = false});
+            _client = new HttpClient(new HttpClientHandler { UseCookies = false });
         }
 
         [Route("{contactId}/{marketId}/{cartName}/v2/payments/{orderId}/shippingDetails")]
@@ -69,11 +70,13 @@ namespace Vipps.Controllers
                 var requestInstanceId = GetInstanceId();
                 var currentInstanceId = _vippsOrderSynchronizer.GetInstanceId();
 
-                _logger.Information($"Request instance id is: {requestInstanceId}. Current instance id id: {currentInstanceId}. Order id: {orderId}");
+                _logger.Information($"Request instance id is: '{requestInstanceId}'. Current instance id id: '{currentInstanceId}'. Order id: '{orderId}'");
 
-                if (!string.IsNullOrEmpty(currentInstanceId))
+                // NOTE: For this to work correctly, the instance that the actual order is created on must be used.
+                // Alternatively one single instance can be forced.
+                if (!string.IsNullOrEmpty(currentInstanceId) && requestInstanceId != currentInstanceId)
                 {
-                    var response = GetCookieRedirectResponse(currentInstanceId);
+                    var response = await ResendWithCookie(currentInstanceId, paymentCallback);
                     return ResponseMessage(response);
                 }
 
@@ -116,27 +119,23 @@ namespace Vipps.Controllers
 
             return cookie[cookieName].Value;
         }
-
-        private HttpResponseMessage GetCookieRedirectResponse(string instanceId)
+        private async Task<HttpResponseMessage> ResendWithCookie(string instanceId, PaymentCallback paymentCallback)
         {
-            var message = new HttpResponseMessage(HttpStatusCode.Found);
-            var cookies = new []
+            _logger.Information($"Resending post request for order {paymentCallback.OrderId} to instance {instanceId} to url {Request.RequestUri}");
+
+            var httpRequestMessage = new HttpRequestMessage
             {
-                new CookieHeaderValue(_cookieName, instanceId)
+                Method = HttpMethod.Post,
+                RequestUri = Request.RequestUri,
+                Headers = 
+                {
+                    { nameof(HttpRequestHeader.Cookie), $"{_cookieName}={instanceId}" }
+                },                
+                Content = new StringContent(JsonConvert.SerializeObject(paymentCallback), Encoding.UTF8, "application/json")
             };
 
-            try
-            {
-                message.Headers.Location = Request.RequestUri;
-                message.Headers.AddCookies(cookies);
-                message.RequestMessage = Request;
-                return message;
-            }
-            catch
-            {
-                message.Dispose();
-                throw;
-            }
+            return await _client.SendAsync(httpRequestMessage)
+                                .ConfigureAwait(false);
         }
     }
 }
