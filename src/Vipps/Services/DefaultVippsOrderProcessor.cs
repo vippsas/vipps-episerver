@@ -485,9 +485,11 @@ namespace Vipps.Services
 
                 return true;
             }
-            catch (Exception ex)
+            catch (ObjectDisposedException ex)
             {
                 _logger.Error(ex.Message, ex);
+                _synchronizer.Remove(lockInfo.OrderId);
+
                 return false;
             }
         }
