@@ -71,28 +71,28 @@ namespace Vipps.Controllers
 
                 _logger.Information($"Request instance id is: {requestInstanceId}. Current instance id id: {currentInstanceId}. Order id: {orderId}");
 
-                if (string.IsNullOrEmpty(currentInstanceId) || currentInstanceId == requestInstanceId)
+                if (!string.IsNullOrEmpty(currentInstanceId))
                 {
-                    HttpStatusCode result;
-
-                    if (paymentCallback.ShippingDetails != null && paymentCallback.UserDetails != null)
-                    {
-                        _logger.Information($"Handling express callback for {orderId}");
-
-                        result = await _responseFactory.HandleExpressCallback(orderId, contactId, marketId, cartName, paymentCallback);
-                    }
-                    else
-                    {
-                        _logger.Information($"Handling checkout callback for {orderId}");
-
-                        result = await _responseFactory.HandleCallback(orderId, contactId, marketId, cartName, paymentCallback);
-                    }
-                    
-                    return Content(result, string.Empty);
+                    var response = GetCookieRedirectResponse(currentInstanceId);
+                    return ResponseMessage(response);
                 }
 
-                var response = GetCookieRedirectResponse(currentInstanceId);
-                return ResponseMessage(response);
+                HttpStatusCode result;
+
+                if (paymentCallback.ShippingDetails != null && paymentCallback.UserDetails != null)
+                {
+                    _logger.Information($"Handling express callback for {orderId}");
+
+                    result = await _responseFactory.HandleExpressCallback(orderId, contactId, marketId, cartName, paymentCallback);
+                }
+                else
+                {
+                    _logger.Information($"Handling checkout callback for {orderId}");
+
+                    result = await _responseFactory.HandleCallback(orderId, contactId, marketId, cartName, paymentCallback);
+                }
+
+                return Content(result, string.Empty);
             }
 
             catch (Exception ex)
