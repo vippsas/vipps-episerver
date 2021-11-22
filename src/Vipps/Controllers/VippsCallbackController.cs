@@ -9,6 +9,7 @@ using EPiServer.Logging;
 using Vipps.Services;
 using Vipps.Models.RequestModels;
 using Vipps.Models.ResponseModels;
+using System.Net;
 
 namespace Vipps.Controllers
 {
@@ -65,26 +66,33 @@ namespace Vipps.Controllers
         {
             try
             {
-                var authorization = Request.Headers.Authorization?.ToString();
+                var requestInstanceId = GetInstanceId();
                 var currentInstanceId = _vippsOrderSynchronizer.GetInstanceId();
-                _logger.Information($"Request instance id is: {authorization}. Current instance id id: {currentInstanceId}. Order id: {orderId}");
 
-                ValidateCookieIfExists(currentInstanceId);
+                _logger.Information($"Request instance id is: {requestInstanceId}. Current instance id id: {currentInstanceId}. Order id: {orderId}");
 
-                if (string.IsNullOrEmpty(currentInstanceId) || currentInstanceId == authorization)
+                if (string.IsNullOrEmpty(currentInstanceId) || currentInstanceId == requestInstanceId)
                 {
+                    HttpStatusCode result;
+
                     if (paymentCallback.ShippingDetails != null && paymentCallback.UserDetails != null)
                     {
                         _logger.Information($"Handling express callback for {orderId}");
-                        return Content(await _responseFactory.HandleExpressCallback(orderId, contactId, marketId, cartName, paymentCallback), string.Empty);
-                    }
 
-                    _logger.Information($"Handling checkout callback for {orderId}");
-                    return Content(await _responseFactory.HandleCallback(orderId, contactId, marketId, cartName, paymentCallback), string.Empty);
+                        result = await _responseFactory.HandleExpressCallback(orderId, contactId, marketId, cartName, paymentCallback);
+                    }
+                    else
+                    {
+                        _logger.Information($"Handling checkout callback for {orderId}");
+
+                        result = await _responseFactory.HandleCallback(orderId, contactId, marketId, cartName, paymentCallback);
+                    }
+                    
+                    return Content(result, string.Empty);
                 }
 
-                ResendWithCookie(authorization, paymentCallback);
-                return Ok();
+                var response = GetCookieRedirectResponse(currentInstanceId);
+                return ResponseMessage(response);
             }
 
             catch (Exception ex)
@@ -94,30 +102,41 @@ namespace Vipps.Controllers
             }
         }
 
-        private void ValidateCookieIfExists(string currentInstanceId)
+        private string GetInstanceId()
         {
-            var cookie = Request.Headers.GetCookies(_cookieName).FirstOrDefault();
-            if (cookie == null)
-            {
-                //Request from vipps
-                return;
-            }
-
-            var value = cookie[_cookieName].Value;
-            if (value != currentInstanceId)
-            {
-                //We set the cookie. Failed to redirect to instance
-                throw new Exception($"Cookie value {value} not equal to current instance id {currentInstanceId}.");
-            }
+            return GetCookieValue(_cookieName);
         }
 
-        private void ResendWithCookie(string instanceId, PaymentCallback paymentCallback)
+        private string GetCookieValue(string cookieName)
         {
-            _logger.Information($"Resending post request for order {paymentCallback.OrderId} to instance {instanceId}");
-            var url = Request.RequestUri;
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(instanceId);
-            _client.DefaultRequestHeaders.Add("Cookie", $"{_cookieName}={instanceId}");
-            _client.PostAsJsonAsync(url, paymentCallback);
+            var cookie = Request.Headers.GetCookies(cookieName).FirstOrDefault();
+
+            if (cookie == null)
+                return null;
+
+            return cookie[cookieName].Value;
+        }
+
+        private HttpResponseMessage GetCookieRedirectResponse(string instanceId)
+        {
+            var message = new HttpResponseMessage(HttpStatusCode.Found);
+            var cookies = new []
+            {
+                new CookieHeaderValue(_cookieName, instanceId)
+            };
+
+            try
+            {
+                message.Headers.Location = Request.RequestUri;
+                message.Headers.AddCookies(cookies);
+                message.RequestMessage = Request;
+                return message;
+            }
+            catch
+            {
+                message.Dispose();
+                throw;
+            }
         }
     }
 }
