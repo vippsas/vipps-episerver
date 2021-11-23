@@ -29,9 +29,9 @@ namespace Vipps.Services
                 MerchantInfo = new MerchantInfo
                 {
                     AuthToken = _vippsOrderSynchronizer.GetInstanceId(),
-                    CallbackPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/{contactId.ToString()}/{marketId}/{orderGroup.Name}"),
+                    CallbackPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/{contactId}/{marketId}/{orderGroup.Name}"),
                     ConsentRemovalPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/"),
-                    ShippingDetailsPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/{contactId.ToString()}/{marketId}/{orderGroup.Name}"),
+                    ShippingDetailsPrefix = EnsureCorrectUrl(configuration.SiteBaseUrl, $"vippscallback/{contactId}/{marketId}/{orderGroup.Name}"),
                     FallBack = $"{configuration.FallbackUrl}?orderId={orderId}&contactId={contactId}&marketId={marketId}&cartName={orderGroup.Name}",
                     IsApp = false,
                     MerchantSerialNumber = Convert.ToInt32(configuration.MerchantSerialNumber),
