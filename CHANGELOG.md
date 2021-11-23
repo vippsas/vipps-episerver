@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.1.0]
+Upgraded to .NET Framework 4.7.2 and fixed an issue with Azure load balanced servers.
+
 ## [4.0.1]
 Fixed issue with Edit Purchase Order in Commerce Manager not finding correct UserControl for VippsOrderId property.
 
