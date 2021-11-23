@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.1]
+Fixed issue with Edit Purchase Order in Commerce Manager not finding correct UserControl for VippsOrderId property.
+
 ## [4.0.0]
 First version released on https://nuget.episerver.com/
 
