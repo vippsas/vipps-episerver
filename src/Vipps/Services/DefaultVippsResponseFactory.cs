@@ -40,13 +40,17 @@ namespace Vipps.Services
         
         public virtual async Task<HttpStatusCode> HandleCallback(string orderId, string contactId, string marketId, string cartName, PaymentCallback paymentCallback)
         {
-            await _vippsOrderCreator.ProcessPaymentCallback(paymentCallback, orderId, contactId, marketId, cartName);
+            await _vippsOrderCreator.ProcessPaymentCallback(paymentCallback, orderId, contactId, marketId, cartName)
+                                    .ConfigureAwait(false);
+
             return HttpStatusCode.OK;
         }
 
         public virtual async Task<HttpStatusCode> HandleExpressCallback(string orderId, string contactId, string marketId, string cartName, PaymentCallback paymentCallback)
         {
-            await _vippsOrderCreator.ProcessPaymentCallback(paymentCallback, orderId, contactId, marketId, cartName);
+            await _vippsOrderCreator.ProcessPaymentCallback(paymentCallback, orderId, contactId, marketId, cartName)
+                                    .ConfigureAwait(false);
+
             return HttpStatusCode.OK;
         }
 

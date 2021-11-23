@@ -67,16 +67,16 @@ namespace Vipps.Controllers
         {
             try
             {
-                var requestInstanceId = GetInstanceId();
+                var requestInstanceId = GetRequestInstanceId();
                 var currentInstanceId = _vippsOrderSynchronizer.GetInstanceId();
 
                 _logger.Information($"Request instance id is: '{requestInstanceId}'. Current instance id id: '{currentInstanceId}'. Order id: '{orderId}'");
 
-                // NOTE: For this to work correctly, the instance that the actual order is created on must be used.
-                // Alternatively one single instance can be forced.
+                ValidateCookieIfExists(currentInstanceId);
+
                 if (!string.IsNullOrEmpty(currentInstanceId) && requestInstanceId != currentInstanceId)
                 {
-                    var response = await ResendWithCookie(currentInstanceId, paymentCallback);
+                    var response = await ResendWithCookie(currentInstanceId, paymentCallback).ConfigureAwait(false);
                     return ResponseMessage(response);
                 }
 
@@ -86,13 +86,15 @@ namespace Vipps.Controllers
                 {
                     _logger.Information($"Handling express callback for {orderId}");
 
-                    result = await _responseFactory.HandleExpressCallback(orderId, contactId, marketId, cartName, paymentCallback);
+                    result = await _responseFactory.HandleExpressCallback(orderId, contactId, marketId, cartName, paymentCallback)
+                                                   .ConfigureAwait(false);
                 }
                 else
                 {
                     _logger.Information($"Handling checkout callback for {orderId}");
 
-                    result = await _responseFactory.HandleCallback(orderId, contactId, marketId, cartName, paymentCallback);
+                    result = await _responseFactory.HandleCallback(orderId, contactId, marketId, cartName, paymentCallback)
+                                                   .ConfigureAwait(false);
                 }
 
                 return Content(result, string.Empty);
@@ -105,20 +107,28 @@ namespace Vipps.Controllers
             }
         }
 
-        private string GetInstanceId()
+        private string GetRequestInstanceId()
         {
-            return GetCookieValue(_cookieName);
+            return Request.Headers.Authorization?.ToString();
         }
 
-        private string GetCookieValue(string cookieName)
+        private void ValidateCookieIfExists(string currentInstanceId)
         {
-            var cookie = Request.Headers.GetCookies(cookieName).FirstOrDefault();
-
+            var cookie = Request.Headers.GetCookies(_cookieName).FirstOrDefault();
             if (cookie == null)
-                return null;
+            {
+                //Request from vipps
+                return;
+            }
 
-            return cookie[cookieName].Value;
+            var value = cookie[_cookieName].Value;
+            if (value != currentInstanceId)
+            {
+                //We set the cookie. Failed to redirect to instance
+                throw new Exception($"Cookie value {value} not equal to current instance id {currentInstanceId}.");
+            }
         }
+
         private async Task<HttpResponseMessage> ResendWithCookie(string instanceId, PaymentCallback paymentCallback)
         {
             _logger.Information($"Resending post request for order {paymentCallback.OrderId} to instance {instanceId} to url {Request.RequestUri}");
@@ -129,6 +139,7 @@ namespace Vipps.Controllers
                 RequestUri = Request.RequestUri,
                 Headers = 
                 {
+                    { nameof(HttpRequestHeader.Authorization), instanceId },
                     { nameof(HttpRequestHeader.Cookie), $"{_cookieName}={instanceId}" }
                 },                
                 Content = new StringContent(JsonConvert.SerializeObject(paymentCallback), Encoding.UTF8, "application/json")
