@@ -434,7 +434,7 @@ namespace Vipps.Services
             }
             finally
             {
-                TryReleaseLock(lockInfo, readLock);
+                _synchronizer.TryRelease(lockInfo.OrderId);
             }
 
             return TryEnsureCartNotProcessing(lockInfo, response);
@@ -458,7 +458,7 @@ namespace Vipps.Services
             }
             finally
             {
-                TryReleaseLock(lockInfo, readLock);
+                _synchronizer.TryRelease(lockInfo.OrderId);
             }
 
             return TryEnsureCartNotProcessing(lockInfo, response);
@@ -472,26 +472,6 @@ namespace Vipps.Services
         private ProcessLockInformation GetLock(string orderId, ICart cart)
         {
             return new ProcessLockInformation(orderId, cart.OrderLink.OrderGroupId);
-        }
-
-        private bool TryReleaseLock(ProcessLockInformation lockInfo, SemaphoreSlim readLock)
-        {
-            try
-            {
-                readLock.Release();
-
-                if (readLock.CurrentCount > 0)
-                    _synchronizer.Remove(lockInfo.OrderId);
-
-                return true;
-            }
-            catch (ObjectDisposedException ex)
-            {
-                _logger.Error(ex.Message, ex);
-                _synchronizer.Remove(lockInfo.OrderId);
-
-                return false;
-            }
         }
 
         private ProcessOrderResponse GetErrorResponse(Exception ex)
