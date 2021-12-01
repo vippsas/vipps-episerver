@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.1.1]
+Addressed an issue with thread synchronization.
+
 ## [4.1.0]
 Upgraded to .NET Framework 4.7.2 and fixed an issue with Azure load balanced servers.
 
