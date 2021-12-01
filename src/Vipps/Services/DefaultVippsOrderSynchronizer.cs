@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Threading;
 using EPiServer.ServiceLocation;
+using Vipps.Models;
 
 namespace Vipps.Services
 {
     [ServiceConfiguration(typeof(IVippsOrderSynchronizer))]
     public class DefaultVippsOrderSynchronizer : IVippsOrderSynchronizer
-    {   
-        private readonly IDictionary<string, SemaphoreSlim> _index;
+    {
         private readonly object _lock;
+        private readonly IDictionary<string, SynchronizerData> _index;
+        
         private readonly int _semaphoreMaxCount;
         private bool _disposed;
 
@@ -18,7 +20,7 @@ namespace Vipps.Services
             _semaphoreMaxCount = 1;
             _disposed = false;
             _lock = new object();
-            _index = new Dictionary<string, SemaphoreSlim>();
+            _index = new Dictionary<string, SynchronizerData>();
         }
 
         ~DefaultVippsOrderSynchronizer()
@@ -32,20 +34,45 @@ namespace Vipps.Services
             GC.SuppressFinalize(this);
         }
 
-        public virtual SemaphoreSlim Get(string orderId)
+        public virtual SemaphoreSlim Get(string key)
         {
             lock (_lock)
             {
-                if (_index.TryGetValue(orderId, out var result))
+                if (_index.TryGetValue(key, out var result))
                 {
-                    return result;
+                    result.Requests++;
+                    return result.Semaphore;
                 }
 
-                return _index[orderId] = Create(orderId);
+                result = Create(key);
+
+                _index.Add(key, result);
+
+                return result.Semaphore;
+            }
+        }
+
+        public int Requests
+        {
+            get 
+            { 
+                var requests = 0;
+
+                foreach (var item in _index)
+                {
+                    requests += item.Value.Requests;
+                }
+
+                return requests;
             }
         }
 
         public virtual void Remove(string key)
+        {
+            Remove(key, true);
+        }
+
+        public virtual void Remove(string key, bool dispose)
         {
             if (!_index.ContainsKey(key))
                 return;
@@ -57,18 +84,58 @@ namespace Vipps.Services
 
                 var value = _index[key];
 
-                Dispose(value);
+                if (dispose)
+                    Dispose(value);
                 
                 _index.Remove(key);
             }
         }
 
-        protected virtual SemaphoreSlim Create(string key)
+        public bool TryRelease(string key)
+        {
+            if (!_index.ContainsKey(key))
+                return false;
+
+            lock (_lock)
+            {
+                if (!_index.TryGetValue(key, out var result))
+                    return false;
+
+                var disposed = false;
+
+                try
+                {
+                    result.Semaphore.Release();
+                    result.Requests--;
+                }
+                catch (ObjectDisposedException)
+                {
+                    result.Requests = 0;
+                    disposed = true;
+                }
+
+                if (result.Requests > 0)
+                    return true;
+
+                _index.Remove(key);
+
+                if (!disposed)
+                    Dispose(result);
+
+                return true;
+            }
+        }
+
+        protected virtual SynchronizerData Create(string key)
         {
             if (key == null) 
                 throw new ArgumentNullException(nameof(key));
 
-            return new SemaphoreSlim(_semaphoreMaxCount, _semaphoreMaxCount);
+            return new SynchronizerData
+            {
+                Semaphore = new SemaphoreSlim(_semaphoreMaxCount, _semaphoreMaxCount),
+                Requests = 1
+            };
         }
 
         protected virtual bool Contains(string key)
@@ -113,7 +180,7 @@ namespace Vipps.Services
             _disposed = true;
         }
 
-        protected virtual void Dispose(SemaphoreSlim value)
+        protected virtual void Dispose(SynchronizerData value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
@@ -124,7 +191,7 @@ namespace Vipps.Services
             }
             catch (ObjectDisposedException)
             {
-                if (_disposed) 
+                if (_disposed)
                     throw;
             }
         }

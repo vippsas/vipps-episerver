@@ -291,6 +291,7 @@
     <Compile Include="Models\ProcessLockInformation.cs" />
     <Compile Include="Models\ProcessOrderResponse.cs" />
     <Compile Include="Models\ProcessResponseErrorType.cs" />
+    <Compile Include="Models\SynchronizerData.cs" />
     <Compile Include="Models\VippsPaymentType.cs" />
     <Compile Include="Models\ProcessAuthorizationResponse.cs" />
     <Compile Include="Models\Partials\TransactionLogHistory.cs" />
