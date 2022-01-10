@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.1.2]
+Upgrade log4net to 2.0.10 due to vulnerability
+
 ## [4.1.1]
 Addressed an issue with thread synchronization.
 
