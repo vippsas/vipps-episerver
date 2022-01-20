@@ -89,7 +89,7 @@ namespace Vipps.Polling
                                 continue;
                             }
 
-                            var cart = _vippsService.GetCartByContactId(entity.OrderId, entity.MarketId, entity.CartName);
+                            var cart = _vippsService.GetCartByContactId(entity.ContactId, entity.MarketId, entity.CartName);
                             if (cart == null)
                             {
                                 _logger.Warning($"No cart found for vipps order id {entity.OrderId}");
