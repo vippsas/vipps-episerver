@@ -18,7 +18,7 @@ namespace Vipps.Helpers
             orderAddress.CountryName = shippingRequest.Country;
             orderAddress.Line1 = shippingRequest.AddressLine1;
             orderAddress.Line2 = shippingRequest.AddressLine2;
-            orderAddress.PostalCode = shippingRequest.PostalCode;
+            orderAddress.PostalCode = shippingRequest.PostCode;
 
             return orderAddress;
         }
@@ -33,7 +33,7 @@ namespace Vipps.Helpers
             orderAddress.CountryName = shippingDetails.Address.Country;
             orderAddress.Line1 = shippingDetails.Address.AddressLine1;
             orderAddress.Line2 = shippingDetails.Address.AddressLine2;
-            orderAddress.PostalCode = shippingDetails.Address.ZipCode;
+            orderAddress.PostalCode = shippingDetails.Address.PostCode;
             orderAddress.FirstName = userDetails.FirstName;
             orderAddress.LastName = userDetails.LastName;
             orderAddress.DaytimePhoneNumber = userDetails.MobileNumber;
