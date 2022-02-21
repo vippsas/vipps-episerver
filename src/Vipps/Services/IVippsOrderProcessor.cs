@@ -18,6 +18,7 @@ namespace Vipps.Services
         Task<ProcessOrderResponse> ProcessOrderDetails(DetailsResponse detailsResponse, string orderId, Guid contactId,
             string marketId, string cartName);
 
+        [Obsolete("This method is not in use and will be removed in an upcoming version.")]
         ProcessOrderResponse ProcessOrderDetails(DetailsResponse detailsResponse, string orderId, ICart cart);
 
         Task<ProcessOrderResponse> ProcessPaymentCallback(PaymentCallback paymentCallback, string orderId, string contactId,
