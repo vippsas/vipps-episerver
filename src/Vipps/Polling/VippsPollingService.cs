@@ -16,7 +16,7 @@ namespace Vipps.Polling
     {
         private readonly PollingEntityDbContext _pollingEntityContext;
         private readonly IVippsService _vippsService;
-        private readonly IVippsOrderProcessor _vippsOrderCreator;
+        private readonly IVippsOrderProcessor _vippsOrderProcessor;
         private readonly IVippsOrderSynchronizer _vippsOrderSynchronizer;
         private readonly ILogger _logger = LogManager.GetLogger(typeof(VippsPollingService));
         private bool _start = true;
@@ -25,12 +25,12 @@ namespace Vipps.Polling
         public VippsPollingService(
             PollingEntityDbContext pollingEntityContext,
             IVippsService vippsService,
-            IVippsOrderProcessor vippsOrderCreator,
+            IVippsOrderProcessor vippsOrderProcessor,
             IVippsOrderSynchronizer vippsOrderSynchronizer)
         {
             _pollingEntityContext = pollingEntityContext;
             _vippsService = vippsService;
-            _vippsOrderCreator = vippsOrderCreator;
+            _vippsOrderProcessor = vippsOrderProcessor;
             _vippsOrderSynchronizer = vippsOrderSynchronizer;
         }
 
@@ -67,7 +67,7 @@ namespace Vipps.Polling
                 try
                 {
                     var instanceId = _vippsOrderSynchronizer.GetInstanceId();
-                    var pollingEntities = _pollingEntityContext.PollingEntities.ToList().Where(x => x.InstanceId == instanceId);
+                    var pollingEntities = _pollingEntityContext.PollingEntities.Where(x => x.InstanceId == instanceId);
 
                     if (!pollingEntities.Any())
                     {
@@ -81,23 +81,8 @@ namespace Vipps.Polling
                         if (entity.Created.AddMinutes(-10) < DateTime.UtcNow)
                         {
                             _logger.Debug($"Running polling for entity with orderId: {entity.OrderId} and instanceId: {entity.InstanceId} on instance {instanceId}");
-                            var orderDetails = await _vippsService.GetOrderDetailsAsync(entity.OrderId, entity.MarketId);
-                            if (orderDetails == null)
-                            {
-                                _logger.Warning($"No order details for vipps order {entity.OrderId}");
-                                pollingEntitiesToRemove.Add(entity);
-                                continue;
-                            }
-
-                            var cart = _vippsService.GetCartByContactId(entity.ContactId, entity.MarketId, entity.CartName);
-                            if (cart == null)
-                            {
-                                _logger.Warning($"No cart found for vipps order id {entity.OrderId}");
-                                pollingEntitiesToRemove.Add(entity);
-                                continue;
-                            }
-
-                            var result = _vippsOrderCreator.ProcessOrderDetails(orderDetails, entity.OrderId, cart);
+                            var result = await _vippsOrderProcessor.FetchAndProcessOrderDetailsAsync(entity.OrderId,
+                                entity.ContactId, entity.MarketId, entity.CartName);
                             if (result.PurchaseOrder != null || result.ProcessResponseErrorType != ProcessResponseErrorType.OTHER)
                             {
                                 pollingEntitiesToRemove.Add(entity);
@@ -115,12 +100,16 @@ namespace Vipps.Polling
                     _logger.Error(ex.Message, ex);
                 }
 
+                var hasChanges = false;
                 foreach (var entityToRemove in pollingEntitiesToRemove)
                 {
                     _pollingEntityContext.PollingEntities.Remove(entityToRemove);
+                    hasChanges = true;
                 }
 
-                _pollingEntityContext.SaveChangesDatabaseWins();
+                if (hasChanges)
+                    _pollingEntityContext.SaveChangesDatabaseWins();
+
                 _running = false;
             }
         }

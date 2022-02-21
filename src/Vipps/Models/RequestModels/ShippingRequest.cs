@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace Vipps.Models.RequestModels
 {
@@ -19,6 +20,7 @@ namespace Vipps.Models.RequestModels
         [JsonProperty("city")]
         public string City { get; set; }
 
+        [Obsolete("This property is not in use and will be removed in a future release. Use PostCode instead")]
         [JsonProperty("postalCode")]
         public string PostalCode { get; set; }
 
