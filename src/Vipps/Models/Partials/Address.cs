@@ -17,10 +17,11 @@ namespace Vipps.Models.Partials
         [JsonProperty("country")]
         public string Country { get; set; }
 
+        //GetOrderDetails api response uses postCode
         [JsonProperty("postCode")]
         public string PostCode { get; set; }
 
-        [Obsolete("This property is not in use and will be removed in a future release. Use PostCode instead")]
+        //Express callback uses zipCode
         [JsonProperty("zipCode")]
         public string ZipCode { get; set; }
     }
