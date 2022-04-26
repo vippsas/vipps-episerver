@@ -264,7 +264,6 @@
     <Compile Include="Handlers\OrderCancelledEvents.cs" />
     <Compile Include="Helpers\AddressHelper.cs" />
     <Compile Include="Helpers\AsyncHelper.cs" />
-    <Compile Include="Helpers\ExpressPaymentOrderDetailsHelper.cs" />
     <Compile Include="Helpers\OrderNoteHelper.cs" />
     <Compile Include="Helpers\OrderNumberHelper.cs" />
     <Compile Include="Helpers\PaymentHelper.cs" />
