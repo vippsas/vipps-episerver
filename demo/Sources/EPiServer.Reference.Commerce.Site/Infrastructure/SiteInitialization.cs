@@ -92,6 +92,7 @@ namespace EPiServer.Reference.Commerce.Site.Infrastructure
 
             services.AddTransient<IVippsService, VippsService>();
             services.AddTransient<IVippsPaymentService, VippsPaymentService>();
+            services.AddTransient<IVippsAsyncPaymentService, VippsAsyncPaymentService>();
             services.AddTransient<IVippsRequestFactory, DefaultVippsRequestFactory>();
             services.AddTransient<IVippsResponseFactory, DefaultVippsResponseFactory>();
             services.AddSingleton<IVippsOrderSynchronizer, DefaultVippsOrderSynchronizer>();

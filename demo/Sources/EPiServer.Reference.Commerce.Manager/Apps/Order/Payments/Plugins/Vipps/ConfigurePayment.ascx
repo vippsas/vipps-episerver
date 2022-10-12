@@ -61,6 +61,13 @@
                         </td>
                     </tr>
                     <tr>
+                        <td class="FormLabelCell">System name:</td>
+                        <td class="FormFieldCell">
+                            <asp:TextBox runat="server" ID="txtSystemName"  />
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" ControlToValidate="txtSystemName" ErrorMessage="System name is required." />
+                        </td>
+                    </tr>
+                    <tr>
                         <td class="FormLabelCell">Api Url:</td>
                         <td class="FormFieldCell">
                             <asp:TextBox runat="server" ID="txtApiUrl" CssClass="vipps-parameters-url" />
