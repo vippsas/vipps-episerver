@@ -18,9 +18,9 @@ Vipps payments and Vipps Express Checkout for Episerver Commerce.
 
 ## More info
 
- - [Vipps Developer Resources](https://github.com/vippsas/vipps-developers)
- - [Vipps eCommere API](https://github.com/vippsas/vipps-ecom-api/)
- - [Frequently Asked Questions for Vipps eCommerce API](https://github.com/vippsas/vipps-ecom-api/blob/master/vipps-ecom-api-faq.md)
+ - [Vipps Developer Resources](https://developer.vippsmobilepay.com/)
+ - [Vipps eCommere API](https://developer.vippsmobilepay.com/docs/APIs/ecom-api/)
+ - [Frequently Asked Questions for Vipps APIs](https://developer.vippsmobilepay.com/docs/vipps-developers/faqs/)
 
 ## Changelog
 

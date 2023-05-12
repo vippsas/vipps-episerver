@@ -48,7 +48,7 @@ In order to use / work on this package locally you'll need a tool called [ngrok]
  - **Client Secret**- Can be obtained through [portal.vipps.no](https://portal.vipps.no)
  - **Subscription Key** - Can be obtained through [portal.vipps.no](https://portal.vipps.no)
  - **Serial number** - Your merchant Serial number, can be obtained through [portal.vipps.no](https://portal.vipps.no)
- - **System name** - A vendor specific identifier, usually the company name like `acme`, [more here](https://github.com/vippsas/vipps-ecom-api/blob/master/vipps-ecom-api.md#optional-vipps-http-headers)
+ - **System name** - A vendor specific identifier, usually the company name like `acme`, [more here](https://developer.vippsmobilepay.com/docs/vipps-developers/common-topics/http-headers/)
  - **Api Url** - Vipps API URL (test or prod)
  - **Site Base Url** - The URL for your site (used to generate callback URLs, ngrok generated url if running local dev env)
  - **Fallback Url** - URL to your fallback controller
