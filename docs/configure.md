@@ -24,7 +24,7 @@ Login into Commerce Manager and open **Administration -> Order System -> Payment
 
 ## Local development environment
 
-In order to use / work on this package locally you'll need a tool called [ngrok](https://www.ngrok.com). This tool can forward a generated ngrok URL to a localhost URL. Both Vipps regular payments as well as express payments are dependant on callbacks from Vipps.
+In order to use / work on this package locally you'll need a tool called [ngrok](https://www.ngrok.com). This tool can forward a generated ngrok URL to a localhost URL. Both Vipps regular payments as well as express payments are dependent on callbacks from Vipps.
 
 ### Overview tab
 
@@ -42,7 +42,7 @@ In order to use / work on this package locally you'll need a tool called [ngrok]
 
 ![Payment method settings](screenshots/payment-overview.png "Payment method settings")
 
-### Paramaters
+### Parameters
 
  - **Client Id** - Can be obtained through [portal.vipps.no](https://portal.vipps.no)
  - **Client Secret**- Can be obtained through [portal.vipps.no](https://portal.vipps.no)
@@ -53,7 +53,7 @@ In order to use / work on this package locally you'll need a tool called [ngrok]
  - **Site Base Url** - The URL for your site (used to generate callback URLs, ngrok generated url if running local dev env)
  - **Fallback Url** - URL to your fallback controller
 
-![Payment method paramaters](screenshots/payment-parameters.png "Payment method settings")
+![Payment method parameters](screenshots/payment-parameters.png "Payment method settings")
 
 ## Initialization
 
@@ -69,7 +69,7 @@ services.AddSingleton<IVippsOrderProcessor, DefaultVippsOrderProcessor>();
 services.AddSingleton<IVippsPollingService, VippsPollingService>();
 ```
 
-It is important that IVippsOrderProcessor, IVippsPollingService and IVippsOrderSynchronizer is registered as a singletons.
+It is important that IVippsOrderProcessor, IVippsPollingService and IVippsOrderSynchronizer are registered as singletons.
 
 ## Fallback controller
 
@@ -77,7 +77,7 @@ Must be implemented in your project.
 
 The package automatically appends the generated order id as a query string to the specified URL. The quicksilver example implementation can be found [here](../demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs)
 
-`ProcessAuthorizationAsync` method on `IVippsAsyncPaymentService` will return the created purchase order for you if the callback from Vipps was successfull. If not, it will ensure all the correct information is on the payment and shipment objects and then create the purchase order.
+`ProcessAuthorizationAsync` method on `IVippsAsyncPaymentService` will return the created purchase order for you if the callback from Vipps was successful. If not, it will ensure all the correct information is on the payment and shipment objects and then create the purchase order.
 **No validation against tempering with the cart line items is done within the package**
 
 ```
