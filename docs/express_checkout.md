@@ -19,7 +19,7 @@ The controller has three methods:
  - GET vippsexpress/wishlistexpress
  - POST vippsexpress/productexpress?code={code}&quantity={quantity}
 
- In return you get a `ExpressCheckoutResponse` with three properties
+ In return, you get a `ExpressCheckoutResponse` with three properties
   - Success
   - ErrorMessage
   - RedirectUrl
@@ -47,7 +47,7 @@ PaymentHelper will help you create and add a Vipps payment to the cart. It has t
  - `PaymentHelper.GetVippsPaymentMethodDto();` will get the `PaymentMethodDto` for Vipps
  - `PaymentHelper.CreateVippsPayent(ICart, Money, PaymentMethodDto);` will return a Vipps `IPayment` you will be able to add to your cart.
  
- Example of the default VippsExpressContoller is found [here](../src/Vipps/Controllers/VippsExpressController.cs)
+ Example of the default VippsExpressController is found [here](../src/Vipps/Controllers/VippsExpressController.cs)
 
 ## Callbacks
 
@@ -57,7 +57,7 @@ Just create a new class that inherits from `DefaultVippsResponseFactory`, overri
 
 ## Express workflows
 
-There's slightly different workflows depending on where you implement Vipps Express. Here's an overview of the prefered way the different implementations could work.
+There's slightly different workflows depending on where you implement Vipps Express. Here's an overview of the preferred way the different implementations could work.
 
 ### Product page flow
 

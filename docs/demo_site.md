@@ -1,6 +1,6 @@
 # Demo site
 
-Either setup a local version of quicksilver (instructions [here](../demo/README.md)), or run through [Docker](https://github.com/Geta/package-shared/blob/master/README.md#local-development-set-up)
+Either set up a local version of quicksilver (instructions [here](../demo/README.md)), or run through [Docker](https://github.com/Geta/package-shared/blob/master/README.md#local-development-set-up)
 
 **Load and display payment**
 
