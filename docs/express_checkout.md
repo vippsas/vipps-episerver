@@ -28,16 +28,16 @@ The controller has three methods:
 
 For the simplest possible frontend implementation of this using jQuery and AJAX. See [VippsExpress.js](../demo/Sources/EPiServer.Reference.Commerce.Site/Scripts/js/VippsExpress.js) and [Product/Index](../demo/Sources/EPiServer.Reference.Commerce.Site/Views/Product/Index.cshtml)
 
-### Implement your own Express Checkout (Api) Controller
+### Implement your own Express Checkout (API) Controller
 
 If you need to implement your own version of the Express Checkout Controller, which in a majority of cases would be the recommended route, there are a few things that are important to keep in mind:
 
 **Cart metafield "VippsPaymentType" must be set before processing the payment**
-This is how we differentiate express payments from regular checkout payments, as well as how we determine the redirect action in the `ProcessAuthorizationResponse` so the actual processing of the payment will go wrong if this metafield is not set. This metafiled key is located in `VippsConstants.VippsPaymentType` and the avaliable Values in `VippsPaymentType` enum.
+This is how we differentiate express payments from regular checkout payments, as well as how we determine the redirect action in the `ProcessAuthorizationResponse`. So, the actual processing of the payment will go wrong if this metafield is not set. This metafield key is located in `VippsConstants.VippsPaymentType` and the available Values in `VippsPaymentType` enum.
 
 **Cart Name**
 In the included implementation of Vipps Express on product page, the cart name is "VippsSingleProductCart". This string can be found in `VippsConstants.VippsSingleProductCart`. This is because we don't want to delete the users "Default" cart when using the Express Checkout.
-If you're creating your own implementation, the cart name can be anything you choose since it is passed back to us in the callback and fallback urls.
+If you're creating your own implementation, the cart name can be anything you choose since it is passed back to us in the callback and fallback URLs.
 
 **Clear cart payments before adding a new payment**
 It's assumed that a cart only has one Vipps payment associated with it.
@@ -51,8 +51,8 @@ PaymentHelper will help you create and add a Vipps payment to the cart. It has t
 
 ## Callbacks
 
-The code being run on all callbacks is in `DefaultVippsResponseFactory`. 
-If you have any needs to set properties on shipment, f.ex. setting a drop point or customize any other behaviour on express callbacks this is the place to do it.
+The code being run on all callbacks is in `DefaultVippsResponseFactory`.
+If you need to set properties on shipment (e.g., setting a drop point or customizing any other behavior on express callbacks), this is the place to do it.
 Just create a new class that inherits from `DefaultVippsResponseFactory`, override the relevant methods and register it in your initialization module as your implementation of `IVippsResponseFactory`.
 
 ## Express workflows
@@ -87,7 +87,7 @@ There's slightly different workflows depending on where you implement Vipps Expr
 ### Wish list page flow
 
 - User clicks "Vipps Hurtigkasse" button on product page
-- The customers WishList cart is loaded
+- The customers wishlist cart is loaded
 - A cart with a different cart name then your default cart name is created and all products from wishlist are added (to persist customers original/wishlist cart)
 - A flag with "VippsPaymentType" is saved on cart
 - Initiate call to the Vipps API
