@@ -122,7 +122,7 @@ The package includes polling the Vipps API to ensure that the payment is handled
  - Set polling interval by adding `Vipps:PollingInterval`  app setting in web config (in milliseconds). Default is 2000 ms.
 
 ### Initialize polling
-```
+```cs
 [InitializableModule]
 [ModuleDependency(typeof(EPiServer.Commerce.Initialization.InitializationModule))]
 internal class VippsPollingInitialization : IInitializableModule
@@ -141,7 +141,7 @@ internal class VippsPollingInitialization : IInitializableModule
 
 **Example:** (assuming MyOrderService handles all the order validation)
 
-```
+```cs
 public override async Task < ProcessOrderResponse > CreatePurchaseOrder(ICart cart) {
 	try {
 		var response = _myOrderService.CreatePurchaseOrder(cart);
