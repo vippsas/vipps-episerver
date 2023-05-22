@@ -89,7 +89,7 @@ The method returns a `ProcessAuthorizationResponse` which contains an enum calle
  - PRODUCTEXPRESS - Payment was initiated from product page
  - CARTEXPRESS - Payment was initiated from cart page/preview
  - WISHLISTEXPRESS - Payment was initiated from wishlist page/preview
- - UNKOWN - Cart can't be found
+ - UNKNOWN - Cart can't be found
 
 This determines where the fallbackcontroller should redirect if `processAuthorizationResult.Processed = false`
 Back to checkout, product, wishlist or cart page.
@@ -144,17 +144,17 @@ internal class VippsPollingInitialization : IInitializableModule
 ```
 public override async Task < ProcessOrderResponse > CreatePurchaseOrder(ICart cart) {
 	try {
-		var respone = _myOrderService.CreatePurchaseOrder(cart);
+		var response = _myOrderService.CreatePurchaseOrder(cart);
 
 		if (response.Success) {
 			return new ProcessOrderResponse {
-				PurchaseOrder = response.PurcaseOrder
+				PurchaseOrder = response.PurchaseOrder
 			};
 		}
 
 		return new ProcessOrderResponse {
 			ProcessResponseErrorType = ProcessResponseErrorType.ORDERVALIDATIONERROR,
-			ErrorMessage = respone.Message
+			ErrorMessage = response.Message
 		};
 	}
 	catch(Exception ex) {

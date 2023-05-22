@@ -45,7 +45,7 @@ It's assumed that a cart only has one Vipps payment associated with it.
 **PaymentHelper**
 PaymentHelper will help you create and add a Vipps payment to the cart. It has two helpful methods:
  - `PaymentHelper.GetVippsPaymentMethodDto();` will get the `PaymentMethodDto` for Vipps
- - `PaymentHelper.CreateVippsPayent(ICart, Money, PaymentMethodDto);` will return a Vipps `IPayment` you will be able to add to your cart.
+ - `PaymentHelper.CreateVippsPayment(ICart, Money, PaymentMethodDto);` will return a Vipps `IPayment` you will be able to add to your cart.
  
  Example of the default VippsExpressController is found [here](../src/Vipps/Controllers/VippsExpressController.cs)
 
