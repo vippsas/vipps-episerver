@@ -44,21 +44,21 @@ In order to use / work on this package locally you'll need a tool called [ngrok]
 
 ### Parameters
 
- - **Client Id** - Can be obtained through [portal.vipps.no](https://portal.vipps.no)
- - **Client Secret**- Can be obtained through [portal.vipps.no](https://portal.vipps.no)
- - **Subscription Key** - Can be obtained through [portal.vipps.no](https://portal.vipps.no)
- - **Serial number** - Your merchant Serial number, can be obtained through [portal.vipps.no](https://portal.vipps.no)
- - **System name** - A vendor specific identifier, usually the company name like `acme`, [more here](https://developer.vippsmobilepay.com/docs/vipps-developers/common-topics/http-headers/)
- - **Api Url** - Vipps API URL (test or prod)
- - **Site Base Url** - The URL for your site (used to generate callback URLs, ngrok generated url if running local dev env)
- - **Fallback Url** - URL to your fallback controller
+ - **Client Id** - Can be obtained through [portal.vipps.no](https://portal.vipps.no).
+ - **Client Secret**- Can be obtained through [portal.vipps.no](https://portal.vipps.no).
+ - **Subscription Key** - Can be obtained through [portal.vipps.no](https://portal.vipps.no).
+ - **Serial number** - Your merchant Serial number, can be obtained through [portal.vipps.no](https://portal.vipps.no).
+ - **System name** - A vendor specific identifier, usually the company name like `acme`, [more here](https://developer.vippsmobilepay.com/docs/vipps-developers/common-topics/http-headers/).
+ - **Api Url** - Vipps API URL (test or prod).
+ - **Site Base Url** - The URL for your site (used to generate callback URLs, ngrok generated URL if running local dev env).
+ - **Fallback Url** - URL to your fallback controller.
 
 ![Payment method parameters](screenshots/payment-parameters.png "Payment method settings")
 
 ## Initialization
 
 In your initialization module you must register the following interfaces
-```
+```cs
 services.AddTransient<IVippsService, VippsService>();
 services.AddTransient<IVippsPaymentService, VippsPaymentService>();
 services.AddTransient<IVippsRequestFactory, DefaultVippsRequestFactory>();
@@ -69,36 +69,37 @@ services.AddSingleton<IVippsOrderProcessor, DefaultVippsOrderProcessor>();
 services.AddSingleton<IVippsPollingService, VippsPollingService>();
 ```
 
-It is important that IVippsOrderProcessor, IVippsPollingService and IVippsOrderSynchronizer are registered as singletons.
+It is important that `IVippsOrderProcessor`, `IVippsPollingService` and `IVippsOrderSynchronizer` are registered as singletons.
 
 ## Fallback controller
 
 Must be implemented in your project.
 
-The package automatically appends the generated order id as a query string to the specified URL. The quicksilver example implementation can be found [here](../demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs)
+The package automatically appends the generated order ID as a query string to the specified URL. The quicksilver example implementation can be found [here](../demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs).
 
 `ProcessAuthorizationAsync` method on `IVippsAsyncPaymentService` will return the created purchase order for you if the callback from Vipps was successful. If not, it will ensure all the correct information is on the payment and shipment objects and then create the purchase order.
 **No validation against tempering with the cart line items is done within the package**
 
-```
+```cs
 var result = await _vippsAsyncPaymentService.ProcessAuthorizationAsync(currentContactId, currentMarketId, cartName, orderId);
 ```
 
-The method returns a `ProcessAuthorizationResponse` which contains an enum called `VippsPaymentType`, this can be set to
- - CHECKOUT - Payment was initiated from checkoutpage
+The method returns a `ProcessAuthorizationResponse` which contains an enum called `VippsPaymentType`, this can be set to:
+
+ - CHECKOUT - Payment was initiated from checkout page
  - PRODUCTEXPRESS - Payment was initiated from product page
  - CARTEXPRESS - Payment was initiated from cart page/preview
  - WISHLISTEXPRESS - Payment was initiated from wishlist page/preview
  - UNKOWN - Cart can't be found
 
-This determines where the fallbackcontroller should redirect if `processAuthorizationResult.Processed = false`
-Back to checkout, product, wishlist or cart page.
+This determines where the fallback controller should redirect if `processAuthorizationResult.Processed = false`
+Back to the checkout, product, wishlist, or cart page.
 
 If the payment is processed and the paymenttype is `WISHLISTEXPRESS`, you might also consider finding the customers wishlist cart and deleting it in the fallback controller.
 
 *Note that this only applies to Express payments. If you are only using Vipps in the checkout, VippsPaymentType will always be CHECKOUT and the redirect action will be determined by if the payment succeeded or not.*
 
-The ProcessAuthorizationResponse also contains a possible error message as well as a ProcessResponseErrorType enum.
+The `ProcessAuthorizationResponse` also contains a possible error message as well as a `ProcessResponseErrorType` enum.
  - NONE
  - NOCARTFOUND
  - NOVIPPSPAYMENTINCART
@@ -119,7 +120,7 @@ The package includes polling the Vipps API to ensure that the payment is handled
  - Polling is started when a user is redirected to Vipps.
  - Polling is active for up to ten minutes
  - If a payment has a status that we can act upon polling stops.
- - Set polling interval by adding `Vipps:PollingInterval`  app setting in web config (in milliseconds). Default is 2000 ms.
+ - Set polling interval by adding `Vipps:PollingInterval` app setting in web config (in milliseconds). Default is 2000 ms.
 
 ### Initialize polling
 ```
@@ -139,7 +140,7 @@ internal class VippsPollingInitialization : IInitializableModule
 }
 ```
 
-**Example:** (assuming MyOrderService handles all the order validation)
+**Example:** (assuming `MyOrderService` handles all the order validation)
 
 ```
 public override async Task < ProcessOrderResponse > CreatePurchaseOrder(ICart cart) {
