@@ -1,8 +1,8 @@
-# Vipps for EPiServer
+# Optimizely
 
 ## Description
 
-Vipps payments and Vipps Express Checkout for Episerver Commerce.
+Vipps payments and Vipps Express Checkout for Optimizely.
 
 ## Features
  - Payment gateway for Vipps payments in checkout.

@@ -90,7 +90,7 @@ The method returns a `ProcessAuthorizationResponse` which contains an enum calle
  - PRODUCTEXPRESS - Payment was initiated from product page
  - CARTEXPRESS - Payment was initiated from cart page/preview
  - WISHLISTEXPRESS - Payment was initiated from wishlist page/preview
- - UNKOWN - Cart can't be found
+ - UNKNOWN - Cart can't be found
 
 This determines where the fallback controller should redirect if `processAuthorizationResult.Processed = false`
 Back to the checkout, product, wishlist, or cart page.
@@ -123,7 +123,7 @@ The package includes polling the Vipps API to ensure that the payment is handled
  - Set polling interval by adding `Vipps:PollingInterval` app setting in web config (in milliseconds). Default is 2000 ms.
 
 ### Initialize polling
-```
+```cs
 [InitializableModule]
 [ModuleDependency(typeof(EPiServer.Commerce.Initialization.InitializationModule))]
 internal class VippsPollingInitialization : IInitializableModule
@@ -142,20 +142,20 @@ internal class VippsPollingInitialization : IInitializableModule
 
 **Example:** (assuming `MyOrderService` handles all the order validation)
 
-```
+```cs
 public override async Task < ProcessOrderResponse > CreatePurchaseOrder(ICart cart) {
 	try {
-		var respone = _myOrderService.CreatePurchaseOrder(cart);
+		var response = _myOrderService.CreatePurchaseOrder(cart);
 
 		if (response.Success) {
 			return new ProcessOrderResponse {
-				PurchaseOrder = response.PurcaseOrder
+				PurchaseOrder = response.PurchaseOrder
 			};
 		}
 
 		return new ProcessOrderResponse {
 			ProcessResponseErrorType = ProcessResponseErrorType.ORDERVALIDATIONERROR,
-			ErrorMessage = respone.Message
+			ErrorMessage = response.Message
 		};
 	}
 	catch(Exception ex) {
