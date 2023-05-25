@@ -75,7 +75,7 @@ It is important that `IVippsOrderProcessor`, `IVippsPollingService` and `IVippsO
 
 Must be implemented in your project.
 
-The package automatically appends the generated order ID as a query string to the specified URL. The quicksilver example implementation can be found [here](../demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs).
+The package automatically appends the generated order ID as a query string to the specified URL. The quicksilver example implementation can be found [here](https://github.com/vippsas/vipps-episerver/blob/master/demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs).
 
 `ProcessAuthorizationAsync` method on `IVippsAsyncPaymentService` will return the created purchase order for you if the callback from Vipps was successful. If not, it will ensure all the correct information is on the payment and shipment objects and then create the purchase order.
 **No validation against tempering with the cart line items is done within the package**

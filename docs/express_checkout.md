@@ -26,7 +26,7 @@ The controller has three methods:
 
 ### Frontend
 
-For the simplest possible frontend implementation of this using jQuery and AJAX. See [VippsExpress.js](../demo/Sources/EPiServer.Reference.Commerce.Site/Scripts/js/VippsExpress.js) and [Product/Index](../demo/Sources/EPiServer.Reference.Commerce.Site/Views/Product/Index.cshtml)
+For the simplest possible frontend implementation of this using jQuery and AJAX. See [VippsExpress.js](https://github.com/vippsas/vipps-episerver/blob/master/demo/Sources/EPiServer.Reference.Commerce.Site/Scripts/js/VippsExpress.js) and [Product/Index](https://github.com/vippsas/vipps-episerver/blob/master/demo/Sources/EPiServer.Reference.Commerce.Site/Views/Product/Index.cshtml)
 
 ### Implement your own Express Checkout (API) Controller
 
