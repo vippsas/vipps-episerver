@@ -18,6 +18,7 @@ Vipps payments and Vipps Express Checkout for Optimizely.
 
 ## More info
 
+ - [Optimizely GitHub Repository](https://github.com/vippsas/vipps-episerver)
  - [Vipps Developer Resources](https://developer.vippsmobilepay.com/)
  - [Vipps eCommere API](https://developer.vippsmobilepay.com/docs/APIs/ecom-api/)
  - [Frequently Asked Questions for Vipps APIs](https://developer.vippsmobilepay.com/docs/vipps-developers/faqs/)
