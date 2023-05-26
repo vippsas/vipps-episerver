@@ -4,7 +4,7 @@
 
 Vipps payments and Vipps Express Checkout for Optimizely (formerly called *Episerver*).
 
-This module is published on GitHub at [vipps-episerver](https://github.com/vippsas/vipps-episerver).
+This module is published on [GitHub](https://github.com/vippsas/vipps-episerver).
 
 ## Features
  - Payment gateway for Vipps payments in checkout.
