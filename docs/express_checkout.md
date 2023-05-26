@@ -6,7 +6,7 @@
 
 ## Get started
 
-This section assumes you have already installed and configured the Vipps payment method as described [here](configure.md)
+This section assumes you have already installed and configured the Vipps payment method as described [here](configure.md).
 
 ### Express controller
 
@@ -47,7 +47,7 @@ PaymentHelper will help you create and add a Vipps payment to the cart. It has t
  - `PaymentHelper.GetVippsPaymentMethodDto();` will get the `PaymentMethodDto` for Vipps
  - `PaymentHelper.CreateVippsPayment(ICart, Money, PaymentMethodDto);` will return a Vipps `IPayment` you will be able to add to your cart.
  
- Example of the default VippsExpressController is found [here](../src/Vipps/Controllers/VippsExpressController.cs)
+ Example of the default VippsExpressController is found [here](https://github.com/vippsas/vipps-episerver/tree/master/srcVipps/Controllers/VippsExpressController.cs).
 
 ## Callbacks
 
