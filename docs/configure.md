@@ -57,7 +57,7 @@ In order to use / work on this package locally you'll need a tool called [ngrok]
 
 ## Initialization
 
-In your initialization module you must register the following interfaces
+In your initialization module you must register the following interfaces:
 ```cs
 services.AddTransient<IVippsService, VippsService>();
 services.AddTransient<IVippsPaymentService, VippsPaymentService>();
@@ -78,7 +78,7 @@ Must be implemented in your project.
 The package automatically appends the generated order ID as a query string to the specified URL. The quicksilver example implementation can be found [here](https://github.com/vippsas/vipps-episerver/blob/master/demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs).
 
 `ProcessAuthorizationAsync` method on `IVippsAsyncPaymentService` will return the created purchase order for you if the callback from Vipps was successful. If not, it will ensure all the correct information is on the payment and shipment objects and then create the purchase order.
-**No validation against tempering with the cart line items is done within the package**
+**Please note:** No validation against tempering with the cart line items is done within the package.
 
 ```cs
 var result = await _vippsAsyncPaymentService.ProcessAuthorizationAsync(currentContactId, currentMarketId, cartName, orderId);
@@ -97,7 +97,7 @@ Back to the checkout, product, wishlist, or cart page.
 
 If the payment is processed and the paymenttype is `WISHLISTEXPRESS`, you might also consider finding the customers wishlist cart and deleting it in the fallback controller.
 
-*Note that this only applies to Express payments. If you are only using Vipps in the checkout, VippsPaymentType will always be CHECKOUT and the redirect action will be determined by if the payment succeeded or not.*
+**Please note:** This only applies to Express payments. If you are only using Vipps in the checkout, VippsPaymentType will always be `CHECKOUT` and the redirect action will be determined based on whether the payment succeeded or not.
 
 The `ProcessAuthorizationResponse` also contains a possible error message as well as a `ProcessResponseErrorType` enum.
  - NONE
