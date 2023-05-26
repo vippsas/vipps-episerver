@@ -22,7 +22,7 @@ This module is published on [GitHub](https://github.com/vippsas/vipps-episerver)
 
  - [GitHub Repository](https://github.com/vippsas/vipps-episerver)
  - [Vipps Developer Resources](https://developer.vippsmobilepay.com/)
- - [Vipps eCommere API](https://developer.vippsmobilepay.com/docs/APIs/ecom-api/)
+ - [Vipps eCommerce API](https://developer.vippsmobilepay.com/docs/APIs/ecom-api/)
  - [Frequently Asked Questions for Vipps APIs](https://developer.vippsmobilepay.com/docs/vipps-developers/faqs/)
 
 ## Changelog
