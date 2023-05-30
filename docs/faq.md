@@ -13,12 +13,12 @@ For example, a user could place an order and get redirected back from Vipps to t
 At the same time, a callback from Vipps could hit the other server's callback controller.
 
 In an Azure environment, we validate the request based on the current InstanceId and the "ARRAffinity" cookie.
-If the request has gone to the wrong instance, we set the cookie and send the request back to the same controller. [VippsCallbackController.cs](https://github.com/vippsas/vipps-episerver/tree/master/srcVipps/Controllers/VippsCallbackController.cs#L97)
+If the request has gone to the wrong instance, we set the cookie and send the request back to the same controller. [VippsCallbackController.cs](https://github.com/vippsas/vipps-episerver/tree/master/src/Vipps/Controllers/VippsCallbackController.cs#L97)
 
 So what do you do if you are in a load balanced environment that is not hosted in azure?
 Well, with the prerequisite that your sticky session is handled by a cookie with a static name, and the value of the cookie being retrievable from the backend you could:
 
- - Override `DefaultVippsOrderSynchronizer` and make sure [GetInstanceId()](https://github.com/vippsas/vipps-episerver/tree/master/srcVipps/Services/DefaultVippsOrderSynchronizer.cs#L132) returns the value stored in the cookie used for sticky sessions.
+ - Override `DefaultVippsOrderSynchronizer` and make sure [GetInstanceId()](https://github.com/vippsas/vipps-episerver/tree/master/src/Vipps/Services/DefaultVippsOrderSynchronizer.cs#L132) returns the value stored in the cookie used for sticky sessions.
  - Add `Vipps:InstanceCookieName` app setting with the name of the cookie as value
 
 And you should be good to go.
@@ -31,7 +31,7 @@ This is quite easy. Think of this as a hybrid between Vipps as a payment method 
 - Add this URL to the external payment method in Klarna.
 - Load the cart.
 - Fetch the Klarna order that is associated with the cart.
-- Create the Vipps payment like it's done in the express controller(default express controller example can be found [here](https://github.com/vippsas/vipps-episerver/tree/master/srcVipps/Controllers/VippsExpressController.cs#L95)).
+- Create the Vipps payment like it's done in the express controller(default express controller example can be found [here](https://github.com/vippsas/vipps-episerver/tree/master/src/Vipps/Controllers/VippsExpressController.cs#L95)).
 - Run `ProcessPayments()` and redirect to the, hopefully, successful `PaymentRedirectResults` `RedirectUrl`.
 
 One thing to keep in mind is to clear the payments from the order form before adding a new payment. If the transaction is cancelled by customer or something goes wrong, we don't want to keep adding new payments to the form.
