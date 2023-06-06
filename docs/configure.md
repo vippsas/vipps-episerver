@@ -1,12 +1,14 @@
-# Install and configure
+<!-- START_METADATA
+---
+title: Install and configure Optimizely
+sidebar_label: Install and configure
+sidebar_position: 10
+pagination_next: null
+pagination_prev: null
+---
+END_METADATA -->
 
-- [Installation](#installation)
-- [Local development environment](#local-development-environment)
-- [Configure Commerce Manager](#configure-commerce-manager)
-- [Initialization](#initialization)
-- [Fallback controller](#fallback-controller)
-- [OrderValidation](#order-validation)
-- [Polling](#polling)
+# Install and configure
 
 ## Installation
 

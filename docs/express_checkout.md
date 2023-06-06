@@ -1,12 +1,18 @@
-# Express Checkout
+<!-- START_METADATA
+---
+title: Express Checkout with Optimizely
+sidebar_label: Express checkout
+sidebar_position: 20
+pagination_next: null
+pagination_prev: null
+---
+END_METADATA -->
 
-- [Get started](#get-started)
-- [Callbacks](#callbacks)
-- [Express workflows](#express-workflows)
+# Express checkout
 
 ## Get started
 
-This section assumes you have already installed and configured the Vipps payment method as described [here](configure.md).
+This section assumes you have already installed and configured the Vipps payment method as described on the [Install and configure](configure.md) page.
 
 ### Express controller
 
@@ -15,14 +21,16 @@ An API controller for initializing an express checkout is included in the packag
 If you want to use the express checkout in your cart preview, the controller will try and look for a cart named "Default". So if the default cart name for your site is something else, you also need to implement your own controller.
 
 The controller has three methods:
- - GET vippsexpress/cartexpress
- - GET vippsexpress/wishlistexpress
- - POST vippsexpress/productexpress?code={code}&quantity={quantity}
 
- In return, you get a `ExpressCheckoutResponse` with three properties
-  - Success
-  - ErrorMessage
-  - RedirectUrl
+ - `GET vippsexpress/cartexpress`
+ - `GET vippsexpress/wishlistexpress`
+ - `POST vippsexpress/productexpress?code={code}&quantity={quantity}`
+
+ In return, you get a `ExpressCheckoutResponse` with three properties:
+
+  - `Success`
+  - `ErrorMessage`
+  - `RedirectUrl`
 
 ### Frontend
 
@@ -36,7 +44,7 @@ If you need to implement your own version of the Express Checkout Controller, wh
 This is how we differentiate express payments from regular checkout payments, as well as how we determine the redirect action in the `ProcessAuthorizationResponse`. So, the actual processing of the payment will go wrong if this metafield is not set. This metafield key is located in `VippsConstants.VippsPaymentType` and the available Values in `VippsPaymentType` enum.
 
 **Cart Name**
-In the included implementation of Vipps Express on product page, the cart name is "VippsSingleProductCart". This string can be found in `VippsConstants.VippsSingleProductCart`. This is because we don't want to delete the users "Default" cart when using the Express Checkout.
+In the included implementation of Vipps Express on product page, the cart name is `VippsSingleProductCart`. This string can be found in `VippsConstants.VippsSingleProductCart`. This is because we don't want to delete the users "Default" cart when using the Express Checkout.
 If you're creating your own implementation, the cart name can be anything you choose since it is passed back to us in the callback and fallback URLs.
 
 **Clear cart payments before adding a new payment**
@@ -44,10 +52,11 @@ It's assumed that a cart only has one Vipps payment associated with it.
 
 **PaymentHelper**
 PaymentHelper will help you create and add a Vipps payment to the cart. It has two helpful methods:
+
  - `PaymentHelper.GetVippsPaymentMethodDto();` will get the `PaymentMethodDto` for Vipps
  - `PaymentHelper.CreateVippsPayment(ICart, Money, PaymentMethodDto);` will return a Vipps `IPayment` you will be able to add to your cart.
- 
- Example of the default VippsExpressController is found [here](https://github.com/vippsas/vipps-episerver/tree/master/src/Vipps/Controllers/VippsExpressController.cs).
+
+See an [example of the default `VippsExpressController`](https://github.com/vippsas/vipps-episerver/tree/master/src/Vipps/Controllers/VippsExpressController.cs).
 
 ## Callbacks
 
