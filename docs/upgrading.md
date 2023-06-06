@@ -1,14 +1,14 @@
 <!-- START_METADATA
 ---
-title: Upgrading Optimizely
+title: Upgrade Optimizely
 sidebar_position: 80
-sidebar_label: Upgrading
+sidebar_label: Upgrade
 pagination_next: null
 pagination_prev: null
 ---
 END_METADATA -->
 
-# Upgrading
+# Upgrade
 
 ## Automatic database migration
 
