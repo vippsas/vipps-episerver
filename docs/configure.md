@@ -30,13 +30,13 @@ In order to use / work on this package locally you'll need a tool called [ngrok]
 
 ### Overview tab
 
-- **Name(\*)**
-- **System Keyword(\*)** - Vipps(the integration will not work when something else is entered in this field)
-- **Language(\*)** - allows a specific language to be specified for the payment gateway
-- **Class Name(\*)** - choose **Vipps.VippsPaymentGateway**
-- **Payment Class(\*)** - choose **Mediachase.Commerce.Orders.OtherPayment**
-- **IsActive** - **Yes**
-- **Supports Recurring** - **No** - Vipps recurring payments are not yet supported
+- *Name(\*)*
+- *System Keyword(\*)* - Vipps (the integration will not work when something else is entered in this field)
+- *Language(\*)* - Allows a specific language to be specified for the payment gateway
+- *Class Name(\*)* - Choose *Vipps.VippsPaymentGateway*
+- *Payment Class(\*)* - Choose *Mediachase.Commerce.Orders.OtherPayment*
+- *IsActive* - *Yes*
+- *Supports Recurring* - **No** - Vipps recurring payments are not yet supported
 
 (\*) mandatory
 
@@ -46,14 +46,14 @@ In order to use / work on this package locally you'll need a tool called [ngrok]
 
 ### Parameters
 
- - **Client Id** - Can be obtained through [portal.vipps.no](https://portal.vipps.no).
- - **Client Secret**- Can be obtained through [portal.vipps.no](https://portal.vipps.no).
- - **Subscription Key** - Can be obtained through [portal.vipps.no](https://portal.vipps.no).
- - **Serial number** - Your merchant Serial number, can be obtained through [portal.vipps.no](https://portal.vipps.no).
- - **System name** - A vendor specific identifier, usually the company name like `acme`, [more here](https://developer.vippsmobilepay.com/docs/vipps-developers/common-topics/http-headers/).
- - **Api Url** - Vipps API URL (test or prod).
- - **Site Base Url** - The URL for your site (used to generate callback URLs, ngrok generated URL if running local dev env).
- - **Fallback Url** - URL to your fallback controller.
+ - *Client Id* - Can be obtained through [portal.vipps.no](https://portal.vipps.no).
+ - *Client Secret*- Can be obtained through [portal.vipps.no](https://portal.vipps.no).
+ - *Subscription Key* - Can be obtained through [portal.vipps.no](https://portal.vipps.no).
+ - *Serial number* - Your merchant Serial number, can be obtained through [portal.vipps.no](https://portal.vipps.no).
+ - *System name* - A vendor specific identifier, usually the company name like `acme`, [more here](https://developer.vippsmobilepay.com/docs/vipps-developers/common-topics/http-headers/).
+ - *Api Url* - Vipps API URL (test or prod).
+ - *Site Base Url* - The URL for your site (used to generate callback URLs, ngrok generated URL if running local dev env).
+ - *Fallback Url* - URL to your fallback controller.
 
 ![Payment method parameters](screenshots/payment-parameters.png "Payment method settings")
 
