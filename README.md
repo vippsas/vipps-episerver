@@ -1,6 +1,7 @@
 <!-- START_METADATA
 ---
-title: Optimizely plugin
+title: Vipps for Optimizely
+
 sidebar_label: Introduction
 sidebar_position: 1
 pagination_next: null
