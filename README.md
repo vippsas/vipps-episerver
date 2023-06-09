@@ -8,18 +8,22 @@ pagination_prev: null
 ---
 END_METADATA -->
 
-# Optimizely
+# Vipps for Optimizely
+
+*This plugin is built and maintained by [Geta](https://getadigital.com/?epslanguage=en) and is hosted on [GitHub](https://github.com/vippsas/vipps-episerver).*
 
 <!-- START_COMMENT -->
 💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/vipps-plugins/). 💥
 <!-- END_COMMENT -->
 
-This module is hosted on [GitHub](https://github.com/vippsas/vipps-episerver).
-
-Vipps payments and Vipps Express Checkout for Optimizely (formerly called *Episerver*) offering:
+Vipps payments and Vipps Express Checkout for Optimizely offering:
 
 - Payment gateway for Vipps payments in checkout.
 - Vipps Express Checkout functionality.
+
+Note that Optimizely was formerly called *Episerver*.
+
+See the [Vipps Optimizely plugin page](https://vipps.no/produkter-og-tjenester/bedrift/ta-betalt-paa-nett/ta-betalt-paa-nett/episerver/) for more information.
 
 ## Documentation
 
