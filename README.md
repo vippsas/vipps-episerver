@@ -14,7 +14,7 @@ END_METADATA -->
 *This plugin is built and maintained by [Geta](https://getadigital.com/?epslanguage=en) and is hosted on [GitHub](https://github.com/vippsas/vipps-episerver).*
 
 <!-- START_COMMENT -->
-💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/vipps-plugins/). 💥
+💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/plugins/). 💥
 <!-- END_COMMENT -->
 
 Vipps payments and Vipps Express Checkout for Optimizely offering:
@@ -39,7 +39,7 @@ See the [Vipps Optimizely plugin page](https://vipps.no/produkter-og-tjenester/b
 - [GitHub Repository](https://github.com/vippsas/vipps-episerver)
 - [Vipps Developer Resources](https://developer.vippsmobilepay.com/)
 - [Vipps eCommerce API](https://developer.vippsmobilepay.com/docs/APIs/ecom-api/)
-- [Frequently Asked Questions for Vipps APIs](https://developer.vippsmobilepay.com/docs/vipps-developers/faqs/)
+- [Frequently Asked Questions for Vipps APIs](https://developer.vippsmobilepay.com/docs/faqs/)
 
 ## Changelog
 
