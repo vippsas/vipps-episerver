@@ -11,7 +11,9 @@ END_METADATA -->
 
 # Vipps for Optimizely
 
-*This plugin is built and maintained by [Geta](https://getadigital.com/?epslanguage=en) and is hosted on [GitHub](https://github.com/vippsas/vipps-episerver).*
+[![Support and development by Geta ](./docs/images/geta.svg#gh-light-mode-only)![Support and development by Geta](./docs/images/geta_dark.svg#gh-dark-mode-only)](https://getadigital.com/?epslanguage=en)
+
+*This plugin is hosted on [GitHub](https://github.com/vippsas/vipps-episerver).*
 
 <!-- START_COMMENT -->
 💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/plugins/). 💥
