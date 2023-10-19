@@ -14,7 +14,7 @@ END_METADATA -->
 
 ![Vipps](./docs/images/vipps.png) *Available for Vipps.*
 
-![MobilePay](./docs/images/mp.png) *Not planned to be available for MobilePay.*
+![MobilePay](./docs/images/mp.png) *Not available for MobilePay.*
 
 *This plugin is built and maintained by [Geta](https://getadigital.com/?epslanguage=en) and is hosted on [GitHub](https://github.com/vippsas/vipps-episerver).*
 
