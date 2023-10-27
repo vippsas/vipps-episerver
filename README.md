@@ -44,7 +44,7 @@ See the [Vipps Optimizely plugin page](https://vipps.no/produkter-og-tjenester/b
 - [GitHub Repository](https://github.com/vippsas/vipps-episerver)
 - [Vipps Developer Resources](https://developer.vippsmobilepay.com/)
 - [Vipps eCommerce API](https://developer.vippsmobilepay.com/docs/APIs/ecom-api/)
-- [Frequently Asked Questions for Vipps APIs](https://developer.vippsmobilepay.com/docs/faqs/)
+- [Vipps Knowledge base](https://developer.vippsmobilepay.com/docs/common-topics/)
 
 ## Changelog
 
