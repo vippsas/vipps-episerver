@@ -50,10 +50,10 @@ In order to use / work on this package locally you'll need a tool called [ngrok]
 
 ### Parameters
 
-- *Client Id* - Can be obtained through [portal.vipps.no](https://portal.vipps.no).
-- *Client Secret*- Can be obtained through [portal.vipps.no](https://portal.vipps.no).
-- *Subscription Key* - Can be obtained through [portal.vipps.no](https://portal.vipps.no).
-- *Serial number* - Your merchant Serial number, can be obtained through [portal.vipps.no](https://portal.vipps.no).
+- *Client Id* - Can be obtained through [portal.vippsmobilepay.com](https://portal.vippsmobilepay.com).
+- *Client Secret*- Can be obtained through [portal.vippsmobilepay.com](https://portal.vippsmobilepay.com).
+- *Subscription Key* - Can be obtained through [portal.vippsmobilepay.com](https://portal.vippsmobilepay.com).
+- *Serial number* - Your merchant Serial number, can be obtained through [portal.vippsmobilepay.com](https://portal.vippsmobilepay.com).
 - *System name* - A vendor specific identifier, usually the company name like `acme`, [more here](https://developer.vippsmobilepay.com/docs/knowledge-base/http-headers/).
 - *Api Url* - Vipps API URL (test or prod).
 - *Site Base Url* - The URL for your site (used to generate callback URLs, ngrok generated URL if running local dev env).
