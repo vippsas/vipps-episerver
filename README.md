@@ -29,8 +29,6 @@ Vipps payments and Vipps Express Checkout for Optimizely offering:
 
 Note that Optimizely was formerly called *Episerver*.
 
-See the [Vipps Optimizely plugin page](https://vipps.no/produkter-og-tjenester/bedrift/ta-betalt-paa-nett/ta-betalt-paa-nett/episerver/) for more information.
-
 ## Documentation
 
 - [Install and configure](docs/configure.md)
