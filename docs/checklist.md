@@ -18,7 +18,7 @@ There are some checks you should do before going live, to make sure that a payme
     - Make sure your *Fallback Url* is correct in the *Commerce Manager*.
     - Go through the order flow and confirm that an order has been created.
 
-  This forces the order to be created when the user is redirected to your fallback controller. (In the ProcessAuthorizationAsync method in VippsPaymentService).
+  This forces the order to be created when the user is redirected to your fallback controller. (In the `ProcessAuthorizationAsync` method in *VippsPaymentService*).
 
  - [ ] Callbacks
     - Comment out your [polling initialization](configure.md#polling).
