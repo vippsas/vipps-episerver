@@ -22,15 +22,15 @@ If you want to use the express checkout in your cart preview, the controller wil
 
 The controller has three methods:
 
- - `GET vippsexpress/cartexpress`
- - `GET vippsexpress/wishlistexpress`
- - `POST vippsexpress/productexpress?code={code}&quantity={quantity}`
+- `GET vippsexpress/cartexpress`
+- `GET vippsexpress/wishlistexpress`
+- `POST vippsexpress/productexpress?code={code}&quantity={quantity}`
 
  In return, you get a `ExpressCheckoutResponse` with three properties:
 
-  - `Success`
-  - `ErrorMessage`
-  - `RedirectUrl`
+- `Success`
+- `ErrorMessage`
+- `RedirectUrl`
 
 ### Frontend
 
@@ -53,8 +53,8 @@ It's assumed that a cart only has one Vipps payment associated with it.
 **PaymentHelper**
 PaymentHelper will help you create and add a Vipps payment to the cart. It has two helpful methods:
 
- - `PaymentHelper.GetVippsPaymentMethodDto();` will get the `PaymentMethodDto` for Vipps
- - `PaymentHelper.CreateVippsPayment(ICart, Money, PaymentMethodDto);` will return a Vipps `IPayment` you will be able to add to your cart.
+- `PaymentHelper.GetVippsPaymentMethodDto();` will get the `PaymentMethodDto` for Vipps
+- `PaymentHelper.CreateVippsPayment(ICart, Money, PaymentMethodDto);` will return a Vipps `IPayment` you will be able to add to your cart.
 
 See an [example of the default `VippsExpressController`](https://github.com/vippsas/vipps-episerver/tree/master/src/Vipps/Controllers/VippsExpressController.cs).
 
@@ -106,4 +106,3 @@ There's slightly different workflows depending on where you implement Vipps Expr
 - User chooses shipping method and confirms the payment
 - A callback is made to the callback endpoint and the cart is populated with the users information and a PurchaseOrder is created
 - User gets redirected to fallback controller
-

@@ -10,7 +10,7 @@ END_METADATA -->
 
 # Demo site
 
-Either set up a local version of quicksilver (instructions [here](https://github.com/vippsas/vipps-episerver/blob/master/demo/README.md)), or run through [Docker](https://github.com/Geta/package-shared/blob/master/README.md#local-development-set-up).
+Either set up a local version of quicksilver ([instructions on GitHub](https://github.com/vippsas/vipps-episerver/blob/master/demo/README.md)), or run through [Docker](https://github.com/Geta/package-shared/blob/master/README.md#local-development-set-up).
 
 ## Load and display payment
 
@@ -20,7 +20,7 @@ Either set up a local version of quicksilver (instructions [here](https://github
 
 ## Fallback controller
 
-Fallback controller can be found [here](https://github.com/vippsas/vipps-episerver/blob/master/demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs).
+Fallback controller can be found [on GitHub](https://github.com/vippsas/vipps-episerver/blob/master/demo/Sources/EPiServer.Reference.Commerce.Site/Features/Checkout/Controllers/PaymentFallbackController.cs).
 
 ## Product pages
 

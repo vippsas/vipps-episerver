@@ -46,4 +46,3 @@ First version released on [Optimizely NUGET](https://nuget.episerver.com/).
 ## [1.0.0]
 
 Initial release.
-

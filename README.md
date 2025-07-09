@@ -49,4 +49,3 @@ See [Changelog](CHANGELOG.md).
 
 For problems with the plugin,
 [submit an issue](https://github.com/vippsas/vipps-episerver/issues) on GitHub.
-

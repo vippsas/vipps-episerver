@@ -19,7 +19,7 @@ Make sure to _back up the commerce database_ before upgrading, in case any error
 
 The following tables are affected by the database migration. Please ensure beforehand that no tables have constraints (e.g., indexes) that prohibit altering the column `VippsOrderId`.
 
-```
+```text
 OrderGroup_PurchaseOrder
 OrderGroup_PurchaseOrder_Localization
 OrderGroup_ShoppingCart
@@ -30,7 +30,7 @@ OrderGroup_ShoppingCart_Localization
 
 ### VippsPaymentService and VippsAsyncPaymentService
 
-Dependency reference to `IVippsService` has been removed from the constructor. 
+Dependency reference to `IVippsService` has been removed from the constructor.
 This will result in a build error that can be resolved by removing the `IVippsService` parameter from any inheriting classes.
 
 ### IVippsOrderProcessor
