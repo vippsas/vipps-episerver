@@ -38,6 +38,6 @@ A form has been added to [product index](https://github.com/vippsas/vipps-episer
 
 Simple `jquery/ajax` [VippsExpress.js](https://github.com/vippsas/vipps-episerver/blob/master/demo/Sources/EPiServer.Reference.Commerce.Site/Scripts/js/VippsExpress.js).
 
-## Polling Initialization
+## Polling initialization
 
 Initialize polling on the site as in example above [VippsPollingInitialization.cs](https://github.com/vippsas/vipps-episerver/blob/master/demo/Sources/EPiServer.Reference.Commerce.Site/Infrastructure/VippsPollingInitialization.cs).
