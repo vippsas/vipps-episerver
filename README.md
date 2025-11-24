@@ -24,7 +24,9 @@ Vipps payments and Vipps Express Checkout for Optimizely offering:
 - Payment gateway for Vipps payments in checkout.
 - Vipps Express Checkout functionality.
 
-Note that Optimizely was formerly called *Episerver*.
+:::note
+Optimizely was formerly known as *Episerver*.
+:::
 
 ## Documentation
 
