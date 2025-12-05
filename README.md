@@ -19,7 +19,7 @@ END_METADATA -->
 💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/plugins-ext/episerver/). 💥
 <!-- END_COMMENT -->
 
-Vipps payments and Vipps Express Checkout for Optimizely offering:
+Vipps payments and Vipps Express Checkout for Optimizely offers:
 
 - Payment gateway for Vipps payments in checkout.
 - Vipps Express Checkout functionality.
