@@ -39,7 +39,7 @@ Fixed issue with Edit Purchase Order in Commerce Manager not finding correct `Us
 
 ## [4.0.0]
 
-First version released on [Optimizely NUGET](https://nuget.episerver.com/).
+First version released on Optimizely NUGET.
 
 [Upgrading from previous versions](docs/upgrading.md)
 
