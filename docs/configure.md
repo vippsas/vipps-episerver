@@ -12,7 +12,7 @@ END_METADATA -->
 
 ## Installation
 
-Start by installing NuGet packages (use [NuGet](https://nuget.episerver.com/)):
+Start by installing NuGet packages (use [NuGet](https://nuget.optimizely.com/)):
 
 ```bash
     Install-Package Vipps
