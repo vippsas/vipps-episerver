@@ -5,6 +5,7 @@ sidebar_label: Checklist
 sidebar_position: 40
 pagination_next: null
 pagination_prev: null
+section: Plugins
 ---
 END_METADATA -->
 

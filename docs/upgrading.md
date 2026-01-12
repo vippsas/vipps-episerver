@@ -5,6 +5,7 @@ sidebar_position: 80
 sidebar_label: Upgrade
 pagination_next: null
 pagination_prev: null
+section: Plugins
 ---
 END_METADATA -->
 

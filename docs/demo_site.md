@@ -5,6 +5,7 @@ sidebar_label: Demo site
 sidebar_position: 30
 pagination_next: null
 pagination_prev: null
+section: Plugins
 ---
 END_METADATA -->
 

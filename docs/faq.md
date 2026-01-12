@@ -5,6 +5,7 @@ sidebar_label: FAQ
 sidebar_position: 60
 pagination_next: null
 pagination_prev: null
+section: Plugins
 ---
 END_METADATA -->
 

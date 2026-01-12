@@ -5,6 +5,7 @@ sidebar_label: Install and configure
 sidebar_position: 10
 pagination_next: null
 pagination_prev: null
+section: Plugins
 ---
 END_METADATA -->
 

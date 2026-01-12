@@ -5,6 +5,7 @@ sidebar_label: Express checkout
 sidebar_position: 20
 pagination_next: null
 pagination_prev: null
+section: Plugins
 ---
 END_METADATA -->
 
