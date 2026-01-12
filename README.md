@@ -6,6 +6,7 @@ sidebar_position: 1
 description: Offer Vipps payments and Express Checkout for Optimizely.
 pagination_next: null
 pagination_prev: null
+section: Plugins
 ---
 END_METADATA -->
 
