@@ -3,8 +3,8 @@
 title: Install and configure Optimizely
 sidebar_label: Install and configure
 sidebar_position: 10
-pagination_next: null
-pagination_prev: null
+pagination_next: plugins-ext/episerver/docs/express_checkout
+pagination_prev: plugins-ext/episerver/README
 section: Plugins
 ---
 END_METADATA -->

@@ -3,8 +3,8 @@
 title: Optimizely Demo site
 sidebar_label: Demo site
 sidebar_position: 30
-pagination_next: null
-pagination_prev: null
+pagination_next: plugins-ext/episerver/docs/checklist
+pagination_prev: plugins-ext/episerver/docs/express_checkout
 section: Plugins
 ---
 END_METADATA -->

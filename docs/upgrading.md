@@ -3,8 +3,8 @@
 title: Upgrade Optimizely
 sidebar_position: 80
 sidebar_label: Upgrade
-pagination_next: null
-pagination_prev: null
+pagination_next: plugins-ext/episerver/CHANGELOG
+pagination_prev: plugins-ext/episerver/docs/faq
 section: Plugins
 ---
 END_METADATA -->

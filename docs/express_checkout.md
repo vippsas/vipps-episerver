@@ -3,8 +3,8 @@
 title: Express Checkout with Optimizely
 sidebar_label: Express checkout
 sidebar_position: 20
-pagination_next: null
-pagination_prev: null
+pagination_next: plugins-ext/episerver/docs/demo_site
+pagination_prev: plugins-ext/episerver/docs/configure
 section: Plugins
 ---
 END_METADATA -->

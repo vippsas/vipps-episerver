@@ -3,8 +3,8 @@
 title: Optimizely FAQ
 sidebar_label: FAQ
 sidebar_position: 60
-pagination_next: null
-pagination_prev: null
+pagination_next: plugins-ext/episerver/docs/upgrading
+pagination_prev: plugins-ext/episerver/docs/checklist
 section: Plugins
 ---
 END_METADATA -->

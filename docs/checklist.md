@@ -3,8 +3,8 @@
 title: Optimizely Checklist
 sidebar_label: Checklist
 sidebar_position: 40
-pagination_next: null
-pagination_prev: null
+pagination_next: plugins-ext/episerver/docs/faq
+pagination_prev: plugins-ext/episerver/docs/demo_site
 section: Plugins
 ---
 END_METADATA -->

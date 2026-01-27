@@ -4,7 +4,7 @@ title: Optimizely Changelog
 sidebar_position: 100
 description: All notable changes to the Optimizely plugin will be documented in this file.
 pagination_next: null
-pagination_prev: null
+pagination_prev: plugins-ext/episerver/docs/upgrading
 section: Plugins
 ---
 END_METADATA -->
